@@ -2,10 +2,12 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
 }
 
 body {
-    font-family: 'Arial', sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Arial', sans-serif;
     background: 
         radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
         radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
@@ -15,6 +17,7 @@ body {
     color: #333;
     backdrop-filter: blur(10px);
     position: relative;
+    overflow-x: hidden;
 }
 
 body::before {
@@ -48,6 +51,7 @@ body::before {
     flex-direction: column;
     justify-content: center;
     min-height: 100vh;
+    min-height: 100dvh; /* 移动端动态视口高度 */
 }
 
 /* 首页样式 */
@@ -67,7 +71,7 @@ h1 {
     text-align: center;
     color: #4a5568;
     margin-bottom: 10px;
-    font-size: 2.5em;
+    font-size: clamp(1.8em, 5vw, 2.5em);
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
@@ -234,6 +238,12 @@ p {
     display: none;
     flex-direction: column;
     height: 100vh;
+    height: 100dvh; /* 移动端动态视口高度 */
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
 }
 
 #chatroom.active {
@@ -302,10 +312,12 @@ p {
 
 .chat-messages {
     flex: 1;
-    padding: 20px;
+    padding: 15px;
     overflow-y: auto;
+    overflow-x: hidden;
     background: rgba(255, 255, 255, 0.05);
     backdrop-filter: blur(5px);
+    -webkit-overflow-scrolling: touch; /* iOS平滑滚动 */
 }
 
 .message {
@@ -345,8 +357,10 @@ p {
 
 .message-image {
     max-width: 200px;
+    max-width: min(200px, 60vw); /* 移动端自适应 */
     border-radius: 12px;
     cursor: pointer;
+    display: block;
 }
 
 .message-time {
@@ -359,9 +373,10 @@ p {
     background: rgba(255, 255, 255, 0.15);
     border: 1px solid rgba(255, 255, 255, 0.2);
     border-top: 1px solid rgba(255, 255, 255, 0.1);
-    padding: 15px 20px;
+    padding: 12px 15px;
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
+    padding-bottom: max(12px, env(safe-area-inset-bottom)); /* iOS安全区域 */
 }
 
 .input-tools {
@@ -378,6 +393,11 @@ p {
     padding: 8px;
     border-radius: 50%;
     transition: background 0.3s;
+    min-width: 40px;
+    min-height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .tool-btn:hover {
@@ -491,12 +511,107 @@ p {
         padding: 15px;
     }
     
+    #homepage .container {
+        padding: 30px 20px;
+    }
+    
+    h1 {
+        font-size: 2em;
+    }
+    
     .gender-options {
-        flex-direction: column;
+        flex-direction: row;
         gap: 10px;
+    }
+    
+    .gender-label {
+        flex: 1;
+        padding: 12px 10px;
+        font-size: 14px;
     }
     
     .emoji-grid {
         grid-template-columns: repeat(6, 1fr);
+        gap: 8px;
+    }
+    
+    .emoji {
+        font-size: 22px;
+        padding: 6px;
+    }
+    
+    .chat-header {
+        padding: 12px 15px;
+    }
+    
+    #partnerName {
+        font-size: 16px;
+    }
+    
+    .partner-gender {
+        font-size: 11px;
+        padding: 3px 8px;
+    }
+    
+    .status {
+        font-size: 11px;
+        padding: 3px 6px;
+    }
+    
+    .btn-danger {
+        padding: 8px 16px;
+        font-size: 14px;
+    }
+    
+    .message-content {
+        max-width: 80%;
+        font-size: 15px;
+    }
+    
+    .chat-input {
+        padding: 10px 12px;
+    }
+    
+    .input-tools {
+        gap: 8px;
+        margin-bottom: 8px;
+    }
+    
+    .tool-btn {
+        font-size: 18px;
+        min-width: 36px;
+        min-height: 36px;
+    }
+    
+    #messageText {
+        font-size: 15px;
+        padding: 10px 12px;
+    }
+    
+    .btn-send {
+        padding: 10px 16px;
+        font-size: 14px;
+    }
+    
+    .emoji-panel {
+        bottom: 100px;
+        left: 10px;
+        right: 10px;
+    }
+}
+
+/* 超小屏幕优化 */
+@media (max-width: 360px) {
+    h1 {
+        font-size: 1.8em;
+    }
+    
+    .gender-label {
+        padding: 10px 8px;
+        font-size: 13px;
+    }
+    
+    .emoji-grid {
+        grid-template-columns: repeat(5, 1fr);
     }
 }

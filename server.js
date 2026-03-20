@@ -6,7 +6,15 @@ const path = require('path');
 
 const app = express();
 const server = http.createServer(app);
-const io = socketIo(server);
+const io = socketIo(server, {
+    maxHttpBufferSize: 1e7, // 10MB，增加消息大小限制
+    cors: {
+        origin: "*",
+        methods: ["GET", "POST"]
+    },
+    pingTimeout: 60000,
+    pingInterval: 25000
+});
 
 // 静态文件服务
 app.use(express.static(path.join(__dirname, 'public')));
@@ -116,6 +124,16 @@ const userManager = new UserManager();
 // Socket.IO 连接处理
 io.on('connection', (socket) => {
     console.log(`用户连接: ${socket.id}`);
+    
+    // 错误处理
+    socket.on('error', (error) => {
+        console.error(`Socket错误 ${socket.id}:`, error);
+    });
+    
+    // 连接错误处理
+    socket.on('connect_error', (error) => {
+        console.error(`连接错误 ${socket.id}:`, error);
+    });
 
     // 用户加入
     socket.on('joinChat', (userInfo) => {
@@ -189,6 +207,13 @@ io.on('connection', (socket) => {
         const partner = userManager.getPartner(socket.id);
         
         if (user && partner) {
+            // 检查消息大小
+            const messageSize = JSON.stringify(messageData).length;
+            if (messageSize > 5 * 1024 * 1024) { // 5MB限制
+                socket.emit('error', { message: '消息太大，请压缩后再发送' });
+                return;
+            }
+            
             const message = {
                 id: uuidv4(),
                 content: messageData.content,
@@ -203,7 +228,8 @@ io.on('connection', (socket) => {
             // 确认发送成功
             socket.emit('messageSent', message);
             
-            console.log(`消息: ${user.nickname} -> ${partner.nickname}: ${messageData.content}`);
+            const contentPreview = messageData.type === 'image' ? '[图片]' : messageData.content.substring(0, 50);
+            console.log(`消息: ${user.nickname} -> ${partner.nickname}: ${contentPreview}`);
         }
     });
 

@@ -43,11 +43,33 @@ class ChatApp {
     }
     
     connectSocket() {
-        this.socket = io();
+        this.socket = io({
+            reconnection: true,
+            reconnectionDelay: 1000,
+            reconnectionDelayMax: 5000,
+            reconnectionAttempts: 5
+        });
         
         // 连接成功
         this.socket.on('connect', () => {
             console.log('已连接到服务器');
+            if (this.currentUser && this.isMatching) {
+                // 重新加入聊天系统
+                this.socket.emit('joinChat', this.currentUser);
+            }
+        });
+        
+        // 连接错误
+        this.socket.on('connect_error', (error) => {
+            console.error('连接错误:', error);
+        });
+        
+        // 错误处理
+        this.socket.on('error', (error) => {
+            console.error('Socket错误:', error);
+            if (error.message) {
+                alert(error.message);
+            }
         });
         
         // 加入成功
@@ -334,28 +356,117 @@ class ChatApp {
             return;
         }
         
-        if (file.size > 5 * 1024 * 1024) {
-            alert('图片大小不能超过5MB');
+        if (file.size > 10 * 1024 * 1024) {
+            alert('图片大小不能超过10MB');
             return;
         }
         
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            const imageData = e.target.result;
-            
+        // 压缩图片
+        this.compressImage(file, (compressedDataUrl) => {
             // 立即显示自己的图片
-            this.addMessage(imageData, true, true);
+            this.addMessage(compressedDataUrl, true, true);
             
             // 发送到服务器
             this.socket.emit('sendMessage', {
-                content: imageData,
+                content: compressedDataUrl,
                 type: 'image'
             });
-        };
-        reader.readAsDataURL(file);
+        });
         
         // 清空文件输入
         event.target.value = '';
+    }
+    
+    compressImage(file, callback) {
+        // 显示加载提示
+        this.showLoadingMessage('正在处理图片...');
+        
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const img = new Image();
+            img.onload = () => {
+                // 创建canvas进行压缩
+                const canvas = document.createElement('canvas');
+                let width = img.width;
+                let height = img.height;
+                
+                // 限制最大尺寸
+                const maxSize = 800;
+                if (width > height) {
+                    if (width > maxSize) {
+                        height = (height * maxSize) / width;
+                        width = maxSize;
+                    }
+                } else {
+                    if (height > maxSize) {
+                        width = (width * maxSize) / height;
+                        height = maxSize;
+                    }
+                }
+                
+                canvas.width = width;
+                canvas.height = height;
+                
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+                
+                // 压缩质量0.7，转换为JPEG格式
+                const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.7);
+                
+                // 检查压缩后的大小
+                const sizeInBytes = Math.round((compressedDataUrl.length * 3) / 4);
+                const sizeInKB = Math.round(sizeInBytes / 1024);
+                
+                console.log(`图片压缩: ${Math.round(file.size / 1024)}KB -> ${sizeInKB}KB`);
+                
+                // 隐藏加载提示
+                this.hideLoadingMessage();
+                
+                // 如果压缩后仍然太大（超过500KB），进一步降低质量
+                if (sizeInKB > 500) {
+                    const furtherCompressed = canvas.toDataURL('image/jpeg', 0.5);
+                    callback(furtherCompressed);
+                } else {
+                    callback(compressedDataUrl);
+                }
+            };
+            img.onerror = () => {
+                this.hideLoadingMessage();
+                alert('图片加载失败，请重试');
+            };
+            img.src = e.target.result;
+        };
+        reader.onerror = () => {
+            this.hideLoadingMessage();
+            alert('图片读取失败，请重试');
+        };
+        reader.readAsDataURL(file);
+    }
+    
+    showLoadingMessage(text) {
+        const loadingDiv = document.createElement('div');
+        loadingDiv.id = 'loadingMessage';
+        loadingDiv.style.cssText = `
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            z-index: 9999;
+            font-size: 14px;
+        `;
+        loadingDiv.textContent = text;
+        document.body.appendChild(loadingDiv);
+    }
+    
+    hideLoadingMessage() {
+        const loadingDiv = document.getElementById('loadingMessage');
+        if (loadingDiv) {
+            document.body.removeChild(loadingDiv);
+        }
     }
     
     toggleEmojiPanel() {
