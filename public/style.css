@@ -14,7 +14,7 @@ body {
         radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.3) 0%, transparent 50%),
         linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
     min-height: 100vh;
-    color: #333;
+    color: #1a202c;
     backdrop-filter: blur(10px);
     position: relative;
     overflow-x: hidden;
@@ -69,16 +69,18 @@ body::before {
 
 h1 {
     text-align: center;
-    color: #4a5568;
+    color: #1a202c;
     margin-bottom: 10px;
     font-size: clamp(1.8em, 5vw, 2.5em);
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    font-weight: 700;
 }
 
 p {
     text-align: center;
-    color: #718096;
+    color: #2d3748;
     margin-bottom: 30px;
+    font-size: 15px;
 }
 
 .form-group {
@@ -89,7 +91,8 @@ p {
     display: block;
     margin-bottom: 8px;
     font-weight: bold;
-    color: #4a5568;
+    color: #1a202c;
+    font-size: 15px;
 }
 
 .gender-options {
@@ -109,21 +112,21 @@ p {
     justify-content: center;
     cursor: pointer;
     padding: 10px 20px;
-    border: 2px solid rgba(74, 85, 104, 0.3);
+    border: 2px solid rgba(26, 32, 44, 0.3);
     border-radius: 25px;
     transition: all 0.3s;
-    background: rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.35);
     backdrop-filter: blur(10px);
-    color: #4a5568;
+    color: #1a202c;
     font-weight: 500;
     margin: 0;
 }
 
 .gender-label:hover {
-    background: rgba(255, 255, 255, 0.4);
+    background: rgba(255, 255, 255, 0.45);
     border-color: rgba(102, 126, 234, 0.5);
     transform: translateY(-2px);
-    color: #2d3748;
+    color: #1a202c;
 }
 
 .gender-options input[type="radio"]:checked + span {
@@ -140,25 +143,25 @@ p {
 #nickname {
     width: 100%;
     padding: 12px 15px;
-    border: 2px solid rgba(74, 85, 104, 0.3);
+    border: 2px solid rgba(26, 32, 44, 0.3);
     border-radius: 25px;
     font-size: 16px;
     outline: none;
     transition: all 0.3s;
-    background: rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.35);
     backdrop-filter: blur(10px);
-    color: #2d3748;
+    color: #1a202c;
     font-weight: 500;
 }
 
 #nickname::placeholder {
-    color: #718096;
+    color: #4a5568;
 }
 
 #nickname:focus {
     border-color: rgba(102, 126, 234, 0.8);
     box-shadow: 0 0 20px rgba(102, 126, 234, 0.3);
-    background: rgba(255, 255, 255, 0.4);
+    background: rgba(255, 255, 255, 0.45);
 }
 
 .btn-primary, .btn-secondary, .btn-danger, .btn-send {
@@ -169,11 +172,11 @@ p {
     cursor: pointer;
     transition: all 0.3s;
     font-weight: bold;
+    color: white;
 }
 
 .btn-primary {
-    background: linear-gradient(135deg, rgba(102, 126, 234, 0.8) 0%, rgba(118, 75, 162, 0.8) 100%);
-    color: white;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.9) 0%, rgba(118, 75, 162, 0.9) 100%);
     width: 100%;
     border: 1px solid rgba(255, 255, 255, 0.2);
     backdrop-filter: blur(10px);
@@ -181,34 +184,42 @@ p {
 }
 
 .btn-primary:hover {
-    background: linear-gradient(135deg, rgba(102, 126, 234, 0.9) 0%, rgba(118, 75, 162, 0.9) 100%);
+    background: linear-gradient(135deg, rgba(102, 126, 234, 1) 0%, rgba(118, 75, 162, 1) 100%);
     transform: translateY(-2px);
     box-shadow: 0 12px 35px rgba(102, 126, 234, 0.4);
 }
 
 .btn-secondary {
-    background: rgba(113, 128, 150, 0.8);
-    color: white;
+    background: rgba(113, 128, 150, 0.9);
     border: 1px solid rgba(255, 255, 255, 0.2);
     backdrop-filter: blur(10px);
 }
 
+.btn-secondary:hover {
+    background: rgba(113, 128, 150, 1);
+    transform: translateY(-2px);
+}
+
 .btn-danger {
-    background: rgba(229, 62, 62, 0.8);
-    color: white;
+    background: rgba(229, 62, 62, 0.9);
     border: 1px solid rgba(255, 255, 255, 0.2);
     backdrop-filter: blur(10px);
+}
+
+.btn-danger:hover {
+    background: rgba(229, 62, 62, 1);
+    transform: translateY(-2px);
 }
 
 /* 匹配页面样式 */
 #matching .container {
     text-align: center;
-    color: white;
+    color: #1a202c;
 }
 
 .matching-animation {
-    background: rgba(255, 255, 255, 0.15);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(26, 32, 44, 0.2);
     padding: 40px;
     border-radius: 20px;
     backdrop-filter: blur(20px);
@@ -216,6 +227,15 @@ p {
     box-shadow: 
         0 8px 32px rgba(0, 0, 0, 0.1),
         inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.matching-animation h2 {
+    color: #1a202c;
+    font-weight: 600;
+}
+
+.matching-animation p {
+    color: #2d3748;
 }
 
 .spinner {
@@ -251,27 +271,32 @@ p {
 }
 
 .chat-header {
-    background: rgba(255, 255, 255, 0.15);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.25);
+    border: 1px solid rgba(26, 32, 44, 0.2);
+    border-bottom: 1px solid rgba(26, 32, 44, 0.15);
     padding: 15px 20px;
     display: flex;
     justify-content: space-between;
     align-items: center;
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
 }
 
 .partner-info {
     display: flex;
     align-items: center;
     gap: 10px;
-    color: #4a5568;
+    color: #1a202c;
 }
 
 #partnerName {
     font-weight: 600;
-    color: #2d3748;
+    color: #1a202c;
+    font-size: 16px;
 }
 
 .partner-gender {
@@ -303,10 +328,11 @@ p {
     border-radius: 12px;
     font-size: 12px;
     font-weight: bold;
+    color: #1a202c;
 }
 
 .status.online {
-    background: #48bb78;
+    background: rgba(72, 187, 120, 0.8);
     color: white;
 }
 
@@ -347,10 +373,10 @@ p {
 }
 
 .message.other .message-content {
-    background: rgba(255, 255, 255, 0.25);
-    color: #2d3748;
+    background: rgba(255, 255, 255, 0.35);
+    color: #1a202c;
     border-bottom-left-radius: 4px;
-    border: 1px solid rgba(74, 85, 104, 0.2);
+    border: 1px solid rgba(26, 32, 44, 0.2);
     backdrop-filter: blur(10px);
     font-weight: 500;
 }
@@ -365,14 +391,14 @@ p {
 
 .message-time {
     font-size: 11px;
-    color: rgba(74, 85, 104, 0.7);
+    color: #4a5568;
     margin: 5px 10px 0;
 }
 
 .chat-input {
-    background: rgba(255, 255, 255, 0.15);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.25);
+    border: 1px solid rgba(26, 32, 44, 0.2);
+    border-top: 1px solid rgba(26, 32, 44, 0.15);
     padding: 12px 15px;
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
@@ -414,35 +440,39 @@ p {
 #messageText {
     flex: 1;
     padding: 12px 15px;
-    border: 2px solid rgba(74, 85, 104, 0.3);
+    border: 2px solid rgba(26, 32, 44, 0.3);
     border-radius: 20px;
     resize: none;
     outline: none;
     font-family: inherit;
     font-size: 14px;
     max-height: 100px;
-    background: rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.35);
     backdrop-filter: blur(10px);
-    color: #2d3748;
+    color: #1a202c;
     font-weight: 500;
 }
 
 #messageText::placeholder {
-    color: #718096;
+    color: #4a5568;
 }
 
 #messageText:focus {
     border-color: rgba(102, 126, 234, 0.8);
     box-shadow: 0 0 15px rgba(102, 126, 234, 0.3);
-    background: rgba(255, 255, 255, 0.4);
+    background: rgba(255, 255, 255, 0.45);
 }
 
 .btn-send {
-    background: linear-gradient(135deg, rgba(102, 126, 234, 0.8) 0%, rgba(118, 75, 162, 0.8) 100%);
-    color: white;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.9) 0%, rgba(118, 75, 162, 0.9) 100%);
     padding: 12px 20px;
     border: 1px solid rgba(255, 255, 255, 0.2);
     backdrop-filter: blur(10px);
+}
+
+.btn-send:hover {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 1) 0%, rgba(118, 75, 162, 1) 100%);
+    transform: translateY(-1px);
 }
 
 /* 表情包面板 */
@@ -452,8 +482,8 @@ p {
     bottom: 120px;
     left: 20px;
     right: 20px;
-    background: rgba(255, 255, 255, 0.15);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.25);
+    border: 1px solid rgba(26, 32, 44, 0.2);
     border-radius: 15px;
     padding: 15px;
     backdrop-filter: blur(20px);
@@ -491,7 +521,7 @@ p {
 .typing-indicator {
     display: none;
     font-size: 12px;
-    color: #48bb78;
+    color: #2d3748;
     margin-left: 10px;
     animation: pulse 1.5s infinite;
 }
@@ -499,6 +529,16 @@ p {
 @keyframes pulse {
     0%, 100% { opacity: 0.5; }
     50% { opacity: 1; }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes fadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
 }
 
 .typing-indicator.show {

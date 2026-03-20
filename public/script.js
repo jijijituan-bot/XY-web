@@ -338,9 +338,14 @@ class ChatApp {
     addSystemMessage(message) {
         const messageDiv = document.createElement('div');
         messageDiv.style.textAlign = 'center';
-        messageDiv.style.color = 'rgba(255, 255, 255, 0.7)';
-        messageDiv.style.fontSize = '14px';
-        messageDiv.style.margin = '10px 0';
+        messageDiv.style.color = '#4a5568';
+        messageDiv.style.fontSize = '13px';
+        messageDiv.style.margin = '15px 0';
+        messageDiv.style.padding = '8px 15px';
+        messageDiv.style.background = 'rgba(255, 255, 255, 0.2)';
+        messageDiv.style.borderRadius = '15px';
+        messageDiv.style.backdropFilter = 'blur(10px)';
+        messageDiv.style.fontWeight = '500';
         messageDiv.textContent = message;
         
         this.chatMessages.appendChild(messageDiv);
@@ -451,12 +456,16 @@ class ChatApp {
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: rgba(0, 0, 0, 0.8);
-            color: white;
-            padding: 15px 25px;
-            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.95);
+            color: #1a202c;
+            padding: 20px 30px;
+            border-radius: 15px;
             z-index: 9999;
-            font-size: 14px;
+            font-size: 15px;
+            font-weight: 600;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(26, 32, 44, 0.1);
         `;
         loadingDiv.textContent = text;
         document.body.appendChild(loadingDiv);
@@ -504,12 +513,13 @@ class ChatApp {
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.8);
+            background: rgba(0, 0, 0, 0.9);
             display: flex;
             justify-content: center;
             align-items: center;
             z-index: 2000;
             cursor: pointer;
+            animation: fadeIn 0.2s ease;
         `;
         
         const img = document.createElement('img');
@@ -518,13 +528,17 @@ class ChatApp {
             max-width: 90%;
             max-height: 90%;
             border-radius: 10px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
         `;
         
         modal.appendChild(img);
         document.body.appendChild(modal);
         
         modal.onclick = () => {
-            document.body.removeChild(modal);
+            modal.style.animation = 'fadeOut 0.2s ease';
+            setTimeout(() => {
+                document.body.removeChild(modal);
+            }, 200);
         };
     }
 }
