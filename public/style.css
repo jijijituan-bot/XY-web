@@ -698,8 +698,57 @@ p {
 
 .auth-form h2 {
     text-align: center;
-    margin-bottom: 20px;
+    margin-bottom: 30px;
     color: #1a202c;
+    font-size: 28px;
+    font-weight: 600;
+}
+
+/* 认证表单输入框样式 */
+.auth-form input[type="text"],
+.auth-form input[type="password"] {
+    width: 100%;
+    padding: 16px 20px;
+    border: 2px solid rgba(26, 32, 44, 0.2);
+    border-radius: 12px;
+    font-size: 16px;
+    outline: none;
+    transition: all 0.3s ease;
+    background: rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(10px);
+    color: #1a202c;
+    font-weight: 500;
+    box-sizing: border-box;
+}
+
+.auth-form input[type="text"]::placeholder,
+.auth-form input[type="password"]::placeholder {
+    color: #718096;
+    font-weight: 400;
+}
+
+.auth-form input[type="text"]:focus,
+.auth-form input[type="password"]:focus {
+    border-color: rgba(102, 126, 234, 0.8);
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+    background: rgba(255, 255, 255, 0.7);
+    transform: translateY(-1px);
+}
+
+.auth-form input[type="text"]:hover,
+.auth-form input[type="password"]:hover {
+    border-color: rgba(26, 32, 44, 0.3);
+    background: rgba(255, 255, 255, 0.6);
+}
+
+.auth-form .form-group {
+    margin-bottom: 20px;
+}
+
+.auth-form .btn-primary {
+    margin-top: 10px;
+    padding: 16px 30px;
+    font-size: 17px;
 }
 
 .switch-form {
