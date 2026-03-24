@@ -103,6 +103,10 @@ class API {
         return this.request(`/api/cards/user/${userId}`);
     }
 
+    static async getMyCard() {
+        return this.request('/api/cards/my');
+    }
+
     static async sendMessage(toUserId, cardId, content, replyToMessageId = null) {
         return this.request('/api/messages', {
             method: 'POST',

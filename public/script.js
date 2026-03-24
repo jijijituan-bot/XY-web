@@ -41,6 +41,9 @@ async function loadUserData() {
         document.getElementById('profileUsername').textContent = user.username;
         updateGenderDisplay(user.gender);
         
+        // 加载用户自己的卡片
+        await loadMyCard();
+        
         // 加载卡片
         await loadCards();
         
@@ -51,6 +54,36 @@ async function loadUserData() {
         document.getElementById('chatNickname').value = user.username;
     } catch (error) {
         console.error('加载用户数据失败:', error);
+    }
+}
+
+// 加载用户自己的卡片
+async function loadMyCard() {
+    try {
+        const data = await API.getMyCard();
+        const myCardPreview = document.getElementById('myCardPreview');
+        
+        if (data.card) {
+            const user = appState.getUser();
+            const genderIcon = user.gender === 'male' ? '♂' : user.gender === 'female' ? '♀' : '⚧';
+            
+            myCardPreview.innerHTML = `
+                <div class="my-card-content">
+                    <div class="my-card-header">
+                        <span class="my-card-username">${user.username}</span>
+                        <span class="my-card-gender">${genderIcon}</span>
+                    </div>
+                    <div class="my-card-text">${data.card.content}</div>
+                    <div class="my-card-footer">
+                        <span class="my-card-time">创建于 ${Utils.formatDate(data.card.createdAt)}</span>
+                    </div>
+                </div>
+            `;
+        } else {
+            myCardPreview.innerHTML = '<p class="no-card">还没有创建卡片</p>';
+        }
+    } catch (error) {
+        console.error('加载我的卡片失败:', error);
     }
 }
 
@@ -1033,6 +1066,8 @@ function bindModalEvents() {
                 await API.createCard(content);
                 Utils.showToast('卡片保存成功！', 'success');
                 PageManager.hideAllModals();
+                // 刷新我的卡片显示
+                await loadMyCard();
             } catch (error) {
                 Utils.showToast(error.message, 'error');
             } finally {

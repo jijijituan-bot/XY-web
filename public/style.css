@@ -1361,6 +1361,54 @@ p {
     padding: 20px;
 }
 
+.my-card-content {
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 12px;
+    padding: 15px;
+    border: 1px solid rgba(26, 32, 44, 0.1);
+}
+
+.my-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(26, 32, 44, 0.1);
+}
+
+.my-card-username {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1a202c;
+}
+
+.my-card-gender {
+    font-size: 18px;
+    color: #667eea;
+}
+
+.my-card-text {
+    color: #2d3748;
+    line-height: 1.6;
+    font-size: 14px;
+    margin-bottom: 10px;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+.my-card-footer {
+    display: flex;
+    justify-content: flex-end;
+    padding-top: 8px;
+    border-top: 1px solid rgba(26, 32, 44, 0.08);
+}
+
+.my-card-time {
+    font-size: 11px;
+    color: #a0aec0;
+}
+
 /* 模态框 */
 .modal {
     display: none;

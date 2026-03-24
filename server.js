@@ -296,6 +296,24 @@ app.get('/api/cards/user/:userId', async (req, res) => {
     }
 });
 
+// 获取当前用户自己的卡片
+app.get('/api/cards/my', async (req, res) => {
+    try {
+        if (!req.session.userId) {
+            return res.status(401).json({ error: '未登录' });
+        }
+        
+        const card = await Card.findOne({
+            userId: req.session.userId
+        });
+        
+        res.json({ card: card || null });
+    } catch (error) {
+        console.error('获取我的卡片错误:', error);
+        res.status(500).json({ error: '获取卡片失败' });
+    }
+});
+
 // 发送留言
 app.post('/api/messages', async (req, res) => {
     try {
