@@ -370,18 +370,54 @@ function renderMessages() {
     messagesList.innerHTML = Object.values(messagesByUser).map(userGroup => {
         const hasUnread = userGroup.messages.some(m => !m.isRead);
         const latestMessage = userGroup.messages[0]; // 已经按时间倒序排列
+        const totalMessages = userGroup.messages.length;
+        const shouldCollapse = totalMessages > 2;
+        
+        // 分离最新的2条和其余的
+        const recentMessages = userGroup.messages.slice(0, 2);
+        const olderMessages = userGroup.messages.slice(2);
         
         return `
         <div class="message-group ${hasUnread ? 'has-unread' : ''}" data-user-id="${userGroup.userId}">
             <div class="message-group-header">
                 <div class="user-info">
                     <strong>${userGroup.username}</strong>
-                    <span class="message-count">${userGroup.messages.length} 条留言</span>
+                    <span class="message-count">${totalMessages} 条留言</span>
                 </div>
                 <span class="message-time">${Utils.formatDate(latestMessage.createdAt)}</span>
             </div>
             <div class="message-group-content">
-                ${userGroup.messages.map(msg => `
+                ${shouldCollapse ? `
+                <div class="collapsed-messages" style="display: none;">
+                    ${olderMessages.map(msg => `
+                        <div class="message-detail ${msg.isRead ? 'read' : 'unread'}" data-message-id="${msg._id}">
+                            ${msg.replyToContent ? `
+                            <div class="message-original">
+                                <div class="original-label">回复了你的留言</div>
+                                <div class="original-content">"${msg.replyToContent}"</div>
+                            </div>
+                            ` : msg.originalCardContent ? `
+                            <div class="message-original">
+                                <div class="original-label">回复了你的卡片</div>
+                                <div class="original-content">"${msg.originalCardContent}"</div>
+                            </div>
+                            ` : ''}
+                            <div class="message-text">
+                                ${msg.content}
+                            </div>
+                            <div class="message-meta">
+                                <span class="message-time-detail">${Utils.formatDate(msg.createdAt)}</span>
+                                ${!msg.isRead ? '<span class="unread-badge">未读</span>' : ''}
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+                <button class="btn-toggle-messages">
+                    <span class="toggle-text">展开 ${olderMessages.length} 条更早的留言</span>
+                    <span class="toggle-icon">▼</span>
+                </button>
+                ` : ''}
+                ${recentMessages.map(msg => `
                     <div class="message-detail ${msg.isRead ? 'read' : 'unread'}" data-message-id="${msg._id}">
                         ${msg.replyToContent ? `
                         <div class="message-original">
@@ -412,6 +448,31 @@ function renderMessages() {
         </div>
         `;
     }).join('');
+    
+    // 绑定折叠/展开按钮
+    document.querySelectorAll('.btn-toggle-messages').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const messageGroup = e.target.closest('.message-group');
+            const collapsedMessages = messageGroup.querySelector('.collapsed-messages');
+            const toggleText = btn.querySelector('.toggle-text');
+            const toggleIcon = btn.querySelector('.toggle-icon');
+            
+            if (collapsedMessages.style.display === 'none') {
+                // 展开
+                collapsedMessages.style.display = 'flex';
+                toggleText.textContent = '收起更早的留言';
+                toggleIcon.textContent = '▲';
+                btn.classList.add('expanded');
+            } else {
+                // 折叠
+                collapsedMessages.style.display = 'none';
+                const count = collapsedMessages.querySelectorAll('.message-detail').length;
+                toggleText.textContent = `展开 ${count} 条更早的留言`;
+                toggleIcon.textContent = '▼';
+                btn.classList.remove('expanded');
+            }
+        });
+    });
     
     // 绑定回复按钮事件
     document.querySelectorAll('.btn-reply').forEach(btn => {

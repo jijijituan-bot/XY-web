@@ -961,6 +961,44 @@ p {
     margin-bottom: 12px;
 }
 
+.collapsed-messages {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.btn-toggle-messages {
+    width: 100%;
+    padding: 10px;
+    background: rgba(102, 126, 234, 0.08);
+    border: 1px dashed rgba(102, 126, 234, 0.3);
+    border-radius: 8px;
+    color: #667eea;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-weight: 600;
+    margin-bottom: 12px;
+}
+
+.btn-toggle-messages:hover {
+    background: rgba(102, 126, 234, 0.15);
+    border-color: rgba(102, 126, 234, 0.5);
+}
+
+.btn-toggle-messages.expanded {
+    background: rgba(102, 126, 234, 0.12);
+}
+
+.toggle-icon {
+    font-size: 10px;
+    transition: transform 0.3s;
+}
+
 .message-detail {
     padding: 12px;
     background: rgba(255, 255, 255, 0.5);
