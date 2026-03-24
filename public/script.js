@@ -264,15 +264,41 @@ function bindMainPageEvents() {
     
     // 编辑卡片
     document.getElementById('editCardBtn').addEventListener('click', async () => {
-        PageManager.showModal('cardModal');
-        
-        // 加载现有卡片内容
         try {
-            const data = await API.getCards();
-            // 这里需要获取自己的卡片，暂时留空
-            document.getElementById('cardContent').value = '';
+            // 加载用户自己的卡片内容
+            const data = await API.getMyCard();
+            
+            if (data.card) {
+                document.getElementById('cardContent').value = data.card.content;
+                document.getElementById('cardCharCount').textContent = data.card.content.length;
+            } else {
+                document.getElementById('cardContent').value = '';
+                document.getElementById('cardCharCount').textContent = '0';
+            }
+            
+            PageManager.showModal('cardModal');
         } catch (error) {
-            console.error(error);
+            console.error('加载卡片失败:', error);
+            Utils.showToast('加载卡片失败', 'error');
+        }
+    });
+    
+    // 删除卡片
+    document.getElementById('deleteCardBtn').addEventListener('click', async () => {
+        if (!confirm('确定要删除你的卡片吗？删除后将从发现区域消失。')) {
+            return;
+        }
+        
+        try {
+            Utils.showLoading();
+            await API.deleteMyCard();
+            Utils.showToast('卡片已删除', 'success');
+            await loadMyCard();
+        } catch (error) {
+            console.error('删除卡片失败:', error);
+            Utils.showToast('删除失败', 'error');
+        } finally {
+            Utils.hideLoading();
         }
     });
 }

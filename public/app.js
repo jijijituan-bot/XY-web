@@ -107,6 +107,12 @@ class API {
         return this.request('/api/cards/my');
     }
 
+    static async deleteMyCard() {
+        return this.request('/api/cards/my', {
+            method: 'DELETE'
+        });
+    }
+
     static async sendMessage(toUserId, cardId, content, replyToMessageId = null) {
         return this.request('/api/messages', {
             method: 'POST',

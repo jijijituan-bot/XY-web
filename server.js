@@ -256,6 +256,22 @@ app.post('/api/cards', async (req, res) => {
     }
 });
 
+// 删除自己的卡片
+app.delete('/api/cards/my', async (req, res) => {
+    try {
+        if (!req.session.userId) {
+            return res.status(401).json({ error: '未登录' });
+        }
+        
+        await Card.deleteMany({ userId: req.session.userId });
+        
+        res.json({ success: true });
+    } catch (error) {
+        console.error('删除卡片错误:', error);
+        res.status(500).json({ error: '删除卡片失败' });
+    }
+});
+
 // 获取卡片列表（排除自己的）
 app.get('/api/cards', async (req, res) => {
     try {

@@ -1409,6 +1409,15 @@ p {
     color: #a0aec0;
 }
 
+.card-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.card-actions button {
+    flex: 1;
+}
+
 /* 模态框 */
 .modal {
     display: none;
