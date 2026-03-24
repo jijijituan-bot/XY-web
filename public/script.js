@@ -353,28 +353,55 @@ function renderMessages() {
     
     console.log('渲染留言列表:', appState.messages);
     
-    messagesList.innerHTML = appState.messages.map(msg => {
-        console.log('留言数据:', msg);
-        console.log('原始卡片内容:', msg.originalCardContent);
+    // 按用户分组留言
+    const messagesByUser = {};
+    appState.messages.forEach(msg => {
+        if (!messagesByUser[msg.fromUserId]) {
+            messagesByUser[msg.fromUserId] = {
+                username: msg.fromUsername,
+                userId: msg.fromUserId,
+                messages: []
+            };
+        }
+        messagesByUser[msg.fromUserId].messages.push(msg);
+    });
+    
+    // 渲染分组后的留言
+    messagesList.innerHTML = Object.values(messagesByUser).map(userGroup => {
+        const hasUnread = userGroup.messages.some(m => !m.isRead);
+        const latestMessage = userGroup.messages[0]; // 已经按时间倒序排列
         
         return `
-        <div class="message-item ${msg.isRead ? 'read' : 'unread'}" data-message-id="${msg._id}">
-            <div class="message-header">
-                <strong>${msg.fromUsername}</strong>
-                <span class="message-time">${Utils.formatDate(msg.createdAt)}</span>
+        <div class="message-group ${hasUnread ? 'has-unread' : ''}" data-user-id="${userGroup.userId}">
+            <div class="message-group-header">
+                <div class="user-info">
+                    <strong>${userGroup.username}</strong>
+                    <span class="message-count">${userGroup.messages.length} 条留言</span>
+                </div>
+                <span class="message-time">${Utils.formatDate(latestMessage.createdAt)}</span>
             </div>
-            ${msg.originalCardContent ? `
-            <div class="message-original">
-                <div class="original-label">对方回复了你的卡片：</div>
-                <div class="original-content">"${msg.originalCardContent}"</div>
+            <div class="message-group-content">
+                ${userGroup.messages.map(msg => `
+                    <div class="message-detail ${msg.isRead ? 'read' : 'unread'}" data-message-id="${msg._id}">
+                        ${msg.originalCardContent ? `
+                        <div class="message-original">
+                            <div class="original-label">回复了你的卡片</div>
+                            <div class="original-content">"${msg.originalCardContent}"</div>
+                        </div>
+                        ` : ''}
+                        <div class="message-text">
+                            ${msg.content}
+                        </div>
+                        <div class="message-meta">
+                            <span class="message-time-detail">${Utils.formatDate(msg.createdAt)}</span>
+                            ${!msg.isRead ? '<span class="unread-badge">未读</span>' : ''}
+                        </div>
+                    </div>
+                `).join('')}
             </div>
-            ` : ''}
-            <div class="message-content">
-                <div class="message-label">留言内容：</div>
-                <p>${msg.content}</p>
-            </div>
-            <div class="message-actions">
-                <button class="btn-reply" data-user-id="${msg.fromUserId}" data-username="${msg.fromUsername}">回复</button>
+            <div class="message-group-actions">
+                <button class="btn-reply" data-user-id="${userGroup.userId}" data-username="${userGroup.username}">回复</button>
+                <button class="btn-mark-read" data-user-id="${userGroup.userId}">全部标为已读</button>
             </div>
         </div>
         `;
@@ -385,33 +412,56 @@ function renderMessages() {
         btn.addEventListener('click', async (e) => {
             const userId = e.target.dataset.userId;
             const username = e.target.dataset.username;
-            const messageId = e.target.closest('.message-item').dataset.messageId;
             
-            // 标记为已读
-            try {
-                await API.markMessageRead(messageId);
-                e.target.closest('.message-item').classList.remove('unread');
-                e.target.closest('.message-item').classList.add('read');
-                await loadMessages(); // 重新加载更新徽章
-            } catch (error) {
-                console.error('标记已读失败:', error);
-            }
-            
-            // 显示回复模态框（需要获取对方的卡片ID）
+            // 显示回复模态框
             showReplyModal(userId, username);
         });
     });
     
-    // 点击留言项标记为已读
-    document.querySelectorAll('.message-item.unread').forEach(item => {
+    // 绑定全部标为已读按钮
+    document.querySelectorAll('.btn-mark-read').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+            const userId = e.target.dataset.userId;
+            const messageGroup = e.target.closest('.message-group');
+            const unreadMessages = messageGroup.querySelectorAll('.message-detail.unread');
+            
+            try {
+                // 标记该用户的所有未读留言为已读
+                for (const msgEl of unreadMessages) {
+                    const messageId = msgEl.dataset.messageId;
+                    await API.markMessageRead(messageId);
+                    msgEl.classList.remove('unread');
+                    msgEl.classList.add('read');
+                }
+                
+                messageGroup.classList.remove('has-unread');
+                await loadMessages(); // 重新加载更新徽章
+                Utils.showToast('已标记为已读', 'success');
+            } catch (error) {
+                console.error('标记已读失败:', error);
+                Utils.showToast('操作失败', 'error');
+            }
+        });
+    });
+    
+    // 点击留言详情标记为已读
+    document.querySelectorAll('.message-detail.unread').forEach(item => {
         item.addEventListener('click', async (e) => {
-            if (e.target.classList.contains('btn-reply')) return;
+            if (e.target.closest('.btn-reply') || e.target.closest('.btn-mark-read')) return;
             
             const messageId = item.dataset.messageId;
             try {
                 await API.markMessageRead(messageId);
                 item.classList.remove('unread');
                 item.classList.add('read');
+                
+                // 检查该组是否还有未读
+                const messageGroup = item.closest('.message-group');
+                const hasUnread = messageGroup.querySelectorAll('.message-detail.unread').length > 0;
+                if (!hasUnread) {
+                    messageGroup.classList.remove('has-unread');
+                }
+                
                 await loadMessages(); // 重新加载更新徽章
             } catch (error) {
                 console.error('标记已读失败:', error);
