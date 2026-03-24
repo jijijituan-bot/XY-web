@@ -1,7 +1,7 @@
 {
   "name": "anonymous-chat",
-  "version": "1.0.0",
-  "description": "匿名随机匹配聊天系统",
+  "version": "2.0.0",
+  "description": "匿名随机匹配聊天系统 - 带用户系统和卡片功能",
   "main": "server.js",
   "engines": {
     "node": ">=18.0.0"
@@ -13,7 +13,12 @@
   "dependencies": {
     "express": "^4.18.2",
     "socket.io": "^4.7.2",
-    "uuid": "^9.0.0"
+    "uuid": "^9.0.0",
+    "mongoose": "^8.0.0",
+    "bcryptjs": "^2.4.3",
+    "express-session": "^1.17.3",
+    "connect-mongo": "^5.1.0",
+    "dotenv": "^16.3.1"
   },
   "devDependencies": {
     "nodemon": "^3.0.1"
