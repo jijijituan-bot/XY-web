@@ -507,10 +507,18 @@ async function loadConversation(userId) {
     try {
         const data = await API.getConversation(userId);
         const messages = data.messages || [];
-        const currentUserId = appState.getUser()._id;
+        const currentUser = appState.getUser();
+        const currentUserId = String(currentUser._id);
         
-        console.log('加载对话 - 当前用户ID:', currentUserId, '对话用户ID:', userId);
-        console.log('对话消息数量:', messages.length);
+        console.log('=== 加载对话详情 ===');
+        console.log('当前用户:', currentUser.username, 'ID:', currentUserId);
+        console.log('对话用户ID:', userId);
+        console.log('消息总数:', messages.length);
+        
+        if (messages.length > 0) {
+            console.log('第一条消息发送者ID:', String(messages[0].fromUserId));
+            console.log('最后一条消息发送者ID:', String(messages[messages.length - 1].fromUserId));
+        }
         
         const totalMessages = messages.length;
         const shouldCollapse = totalMessages > 4; // 超过4条消息时折叠
@@ -575,10 +583,19 @@ async function loadConversation(userId) {
 
 // 渲染单条对话消息
 function renderConversationMessage(msg, currentUserId) {
-    const isOwn = String(msg.fromUserId) === String(currentUserId);
+    // 确保两个 ID 都转换为字符串进行比较
+    const msgFromId = String(msg.fromUserId);
+    const currUserId = String(currentUserId);
+    const isOwn = msgFromId === currUserId;
     const alignClass = isOwn ? 'message-right' : 'message-left';
     
-    console.log('消息:', msg.content, '发送者ID:', msg.fromUserId, '当前用户ID:', currentUserId, '是自己:', isOwn);
+    console.log('渲染消息:', {
+        content: msg.content.substring(0, 20),
+        fromUserId: msgFromId,
+        currentUserId: currUserId,
+        isOwn: isOwn,
+        alignClass: alignClass
+    });
     
     return `
         <div class="conversation-message ${alignClass} ${!msg.isRead && !isOwn ? 'unread' : ''}" data-message-id="${msg._id}">
