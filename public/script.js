@@ -410,6 +410,9 @@ async function loadConversation(userId) {
         const messages = data.messages || [];
         const currentUserId = appState.getUser()._id;
         
+        console.log('加载对话 - 当前用户ID:', currentUserId, '对话用户ID:', userId);
+        console.log('对话消息数量:', messages.length);
+        
         const totalMessages = messages.length;
         const shouldCollapse = totalMessages > 4; // 超过4条消息时折叠
         
@@ -462,8 +465,10 @@ async function loadConversation(userId) {
 
 // 渲染单条对话消息
 function renderConversationMessage(msg, currentUserId) {
-    const isOwn = msg.fromUserId === currentUserId;
+    const isOwn = String(msg.fromUserId) === String(currentUserId);
     const alignClass = isOwn ? 'message-right' : 'message-left';
+    
+    console.log('消息:', msg.content, '发送者ID:', msg.fromUserId, '当前用户ID:', currentUserId, '是自己:', isOwn);
     
     return `
         <div class="conversation-message ${alignClass} ${!msg.isRead && !isOwn ? 'unread' : ''}" data-message-id="${msg._id}">
