@@ -581,6 +581,17 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+// 健康检查端点
+app.get('/health', (req, res) => {
+    const health = {
+        status: 'ok',
+        timestamp: new Date().toISOString(),
+        mongodb: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
+        session: req.session ? 'enabled' : 'disabled'
+    };
+    res.json(health);
+});
+
 // 统计信息API
 app.get('/api/stats', (req, res) => {
     res.json(userManager.getStats());
