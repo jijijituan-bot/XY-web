@@ -353,135 +353,149 @@ function renderMessages() {
     
     console.log('渲染留言列表:', appState.messages);
     
-    // 按用户分组留言
+    // 按用户分组留言（只统计收到的留言）
     const messagesByUser = {};
     appState.messages.forEach(msg => {
         if (!messagesByUser[msg.fromUserId]) {
             messagesByUser[msg.fromUserId] = {
                 username: msg.fromUsername,
                 userId: msg.fromUserId,
-                messages: []
+                hasUnread: false,
+                latestTime: msg.createdAt
             };
         }
-        messagesByUser[msg.fromUserId].messages.push(msg);
+        if (!msg.isRead) {
+            messagesByUser[msg.fromUserId].hasUnread = true;
+        }
     });
     
-    // 渲染分组后的留言
-    messagesList.innerHTML = Object.values(messagesByUser).map(userGroup => {
-        const hasUnread = userGroup.messages.some(m => !m.isRead);
-        const latestMessage = userGroup.messages[0]; // 已经按时间倒序排列
-        const totalMessages = userGroup.messages.length;
-        const shouldCollapse = totalMessages > 2;
-        
-        // 分离最新的2条和其余的
-        const recentMessages = userGroup.messages.slice(0, 2);
-        const olderMessages = userGroup.messages.slice(2);
-        
+    // 渲染用户列表
+    messagesList.innerHTML = Object.values(messagesByUser).map(userInfo => {
         return `
-        <div class="message-group ${hasUnread ? 'has-unread' : ''}" data-user-id="${userGroup.userId}">
+        <div class="message-group ${userInfo.hasUnread ? 'has-unread' : ''}" data-user-id="${userInfo.userId}">
             <div class="message-group-header">
                 <div class="user-info">
-                    <strong>${userGroup.username}</strong>
-                    <span class="message-count">${totalMessages} 条留言</span>
+                    <strong>${userInfo.username}</strong>
+                    ${userInfo.hasUnread ? '<span class="unread-indicator">有新留言</span>' : ''}
                 </div>
-                <span class="message-time">${Utils.formatDate(latestMessage.createdAt)}</span>
+                <span class="message-time">${Utils.formatDate(userInfo.latestTime)}</span>
             </div>
-            <div class="message-group-content">
-                ${shouldCollapse ? `
-                <div class="collapsed-messages" style="display: none;">
-                    ${olderMessages.map(msg => `
-                        <div class="message-detail ${msg.isRead ? 'read' : 'unread'}" data-message-id="${msg._id}">
-                            ${msg.replyToContent ? `
-                            <div class="message-original">
-                                <div class="original-label">回复了你的留言</div>
-                                <div class="original-content">"${msg.replyToContent}"</div>
-                            </div>
-                            ` : msg.originalCardContent ? `
-                            <div class="message-original">
-                                <div class="original-label">回复了你的卡片</div>
-                                <div class="original-content">"${msg.originalCardContent}"</div>
-                            </div>
-                            ` : ''}
-                            <div class="message-text">
-                                ${msg.content}
-                            </div>
-                            <div class="message-meta">
-                                <span class="message-time-detail">${Utils.formatDate(msg.createdAt)}</span>
-                                ${!msg.isRead ? '<span class="unread-badge">未读</span>' : ''}
-                            </div>
-                        </div>
-                    `).join('')}
-                </div>
-                <button class="btn-toggle-messages">
-                    <span class="toggle-text">展开 ${olderMessages.length} 条更早的留言</span>
-                    <span class="toggle-icon">▼</span>
-                </button>
-                ` : ''}
-                ${recentMessages.map(msg => `
-                    <div class="message-detail ${msg.isRead ? 'read' : 'unread'}" data-message-id="${msg._id}">
-                        ${msg.replyToContent ? `
-                        <div class="message-original">
-                            <div class="original-label">回复了你的留言</div>
-                            <div class="original-content">"${msg.replyToContent}"</div>
-                        </div>
-                        ` : msg.originalCardContent ? `
-                        <div class="message-original">
-                            <div class="original-label">回复了你的卡片</div>
-                            <div class="original-content">"${msg.originalCardContent}"</div>
-                        </div>
-                        ` : ''}
-                        <div class="message-text">
-                            ${msg.content}
-                        </div>
-                        <div class="message-meta">
-                            <span class="message-time-detail">${Utils.formatDate(msg.createdAt)}</span>
-                            ${!msg.isRead ? '<span class="unread-badge">未读</span>' : ''}
-                        </div>
-                    </div>
-                `).join('')}
+            <div class="conversation-container" data-user-id="${userInfo.userId}">
+                <div class="loading-conversation">加载对话中...</div>
             </div>
             <div class="message-group-actions">
-                <button class="btn-reply" data-user-id="${userGroup.userId}" data-username="${userGroup.username}" data-latest-message-id="${latestMessage._id}">回复</button>
-                <button class="btn-mark-read" data-user-id="${userGroup.userId}">全部标为已读</button>
-                <button class="btn-delete" data-user-id="${userGroup.userId}" data-username="${userGroup.username}">删除</button>
+                <button class="btn-reply" data-user-id="${userInfo.userId}" data-username="${userInfo.username}">回复</button>
+                <button class="btn-mark-read" data-user-id="${userInfo.userId}">全部标为已读</button>
+                <button class="btn-delete" data-user-id="${userInfo.userId}" data-username="${userInfo.username}">删除</button>
             </div>
         </div>
         `;
     }).join('');
     
-    // 绑定折叠/展开按钮
-    document.querySelectorAll('.btn-toggle-messages').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            const messageGroup = e.target.closest('.message-group');
-            const collapsedMessages = messageGroup.querySelector('.collapsed-messages');
-            const toggleText = btn.querySelector('.toggle-text');
-            const toggleIcon = btn.querySelector('.toggle-icon');
-            
-            if (collapsedMessages.style.display === 'none') {
-                // 展开
-                collapsedMessages.style.display = 'flex';
-                toggleText.textContent = '收起更早的留言';
-                toggleIcon.textContent = '▲';
-                btn.classList.add('expanded');
-            } else {
-                // 折叠
-                collapsedMessages.style.display = 'none';
-                const count = collapsedMessages.querySelectorAll('.message-detail').length;
-                toggleText.textContent = `展开 ${count} 条更早的留言`;
-                toggleIcon.textContent = '▼';
-                btn.classList.remove('expanded');
-            }
-        });
+    // 为每个用户加载完整对话
+    Object.values(messagesByUser).forEach(userInfo => {
+        loadConversation(userInfo.userId);
     });
+    
+    bindMessageGroupEvents();
+}
+
+// 加载与某个用户的完整对话
+async function loadConversation(userId) {
+    const container = document.querySelector(`.conversation-container[data-user-id="${userId}"]`);
+    if (!container) return;
+    
+    try {
+        const data = await API.getConversation(userId);
+        const messages = data.messages || [];
+        const currentUserId = appState.getUser()._id;
+        
+        const totalMessages = messages.length;
+        const shouldCollapse = totalMessages > 4; // 超过4条消息时折叠
+        
+        // 分离最新的4条和其余的
+        const recentMessages = messages.slice(-4);
+        const olderMessages = messages.slice(0, -4);
+        
+        container.innerHTML = `
+            <div class="conversation-messages">
+                ${shouldCollapse ? `
+                <div class="collapsed-messages" style="display: none;">
+                    ${olderMessages.map(msg => renderConversationMessage(msg, currentUserId)).join('')}
+                </div>
+                <button class="btn-toggle-messages">
+                    <span class="toggle-text">展开 ${olderMessages.length} 条更早的消息</span>
+                    <span class="toggle-icon">▼</span>
+                </button>
+                ` : ''}
+                ${recentMessages.map(msg => renderConversationMessage(msg, currentUserId)).join('')}
+            </div>
+        `;
+        
+        // 绑定折叠按钮
+        const toggleBtn = container.querySelector('.btn-toggle-messages');
+        if (toggleBtn) {
+            toggleBtn.addEventListener('click', (e) => {
+                const collapsedMessages = container.querySelector('.collapsed-messages');
+                const toggleText = toggleBtn.querySelector('.toggle-text');
+                const toggleIcon = toggleBtn.querySelector('.toggle-icon');
+                
+                if (collapsedMessages.style.display === 'none') {
+                    collapsedMessages.style.display = 'block';
+                    toggleText.textContent = '收起更早的消息';
+                    toggleIcon.textContent = '▲';
+                    toggleBtn.classList.add('expanded');
+                } else {
+                    collapsedMessages.style.display = 'none';
+                    toggleText.textContent = `展开 ${olderMessages.length} 条更早的消息`;
+                    toggleIcon.textContent = '▼';
+                    toggleBtn.classList.remove('expanded');
+                }
+            });
+        }
+        
+    } catch (error) {
+        console.error('加载对话失败:', error);
+        container.innerHTML = '<div class="error-message">加载对话失败</div>';
+    }
+}
+
+// 渲染单条对话消息
+function renderConversationMessage(msg, currentUserId) {
+    const isOwn = msg.fromUserId === currentUserId;
+    const alignClass = isOwn ? 'message-right' : 'message-left';
+    
+    return `
+        <div class="conversation-message ${alignClass} ${!msg.isRead && !isOwn ? 'unread' : ''}" data-message-id="${msg._id}">
+            ${msg.replyToContent || msg.originalCardContent ? `
+            <div class="message-context">
+                ${msg.replyToContent ? `回复: "${msg.replyToContent}"` : `回复卡片: "${msg.originalCardContent}"`}
+            </div>
+            ` : ''}
+            <div class="message-bubble">
+                <div class="message-content">${msg.content}</div>
+                <div class="message-time">${Utils.formatDate(msg.createdAt)}</div>
+            </div>
+        </div>
+    `;
+}
+
+// 绑定留言组事件
+function bindMessageGroupEvents() {
     
     // 绑定回复按钮事件
     document.querySelectorAll('.btn-reply').forEach(btn => {
         btn.addEventListener('click', async (e) => {
             const userId = e.target.dataset.userId;
             const username = e.target.dataset.username;
-            const latestMessageId = e.target.dataset.latestMessageId;
             
-            // 显示回复模态框，传递最新留言ID用于回复链
+            // 获取该用户最新的留言ID
+            const container = document.querySelector(`.conversation-container[data-user-id="${userId}"]`);
+            const messages = container.querySelectorAll('.conversation-message.message-left');
+            const latestMessage = messages[messages.length - 1];
+            const latestMessageId = latestMessage ? latestMessage.dataset.messageId : null;
+            
+            // 显示回复模态框
             showReplyModal(userId, username, latestMessageId);
         });
     });
@@ -491,7 +505,7 @@ function renderMessages() {
         btn.addEventListener('click', async (e) => {
             const userId = e.target.dataset.userId;
             const messageGroup = e.target.closest('.message-group');
-            const unreadMessages = messageGroup.querySelectorAll('.message-detail.unread');
+            const unreadMessages = messageGroup.querySelectorAll('.conversation-message.unread');
             
             try {
                 // 标记该用户的所有未读留言为已读
@@ -499,7 +513,6 @@ function renderMessages() {
                     const messageId = msgEl.dataset.messageId;
                     await API.markMessageRead(messageId);
                     msgEl.classList.remove('unread');
-                    msgEl.classList.add('read');
                 }
                 
                 messageGroup.classList.remove('has-unread');
@@ -518,7 +531,7 @@ function renderMessages() {
             const userId = e.target.dataset.userId;
             const username = e.target.dataset.username;
             
-            if (!confirm(`确定要删除来自 ${username} 的所有留言吗？`)) {
+            if (!confirm(`确定要删除与 ${username} 的所有对话吗？`)) {
                 return;
             }
             
@@ -532,31 +545,6 @@ function renderMessages() {
                 Utils.showToast('删除失败', 'error');
             } finally {
                 Utils.hideLoading();
-            }
-        });
-    });
-    
-    // 点击留言详情标记为已读
-    document.querySelectorAll('.message-detail.unread').forEach(item => {
-        item.addEventListener('click', async (e) => {
-            if (e.target.closest('.btn-reply') || e.target.closest('.btn-mark-read')) return;
-            
-            const messageId = item.dataset.messageId;
-            try {
-                await API.markMessageRead(messageId);
-                item.classList.remove('unread');
-                item.classList.add('read');
-                
-                // 检查该组是否还有未读
-                const messageGroup = item.closest('.message-group');
-                const hasUnread = messageGroup.querySelectorAll('.message-detail.unread').length > 0;
-                if (!hasUnread) {
-                    messageGroup.classList.remove('has-unread');
-                }
-                
-                await loadMessages(); // 重新加载更新徽章
-            } catch (error) {
-                console.error('标记已读失败:', error);
             }
         });
     });

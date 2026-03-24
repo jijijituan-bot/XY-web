@@ -114,6 +114,10 @@ class API {
         return this.request('/api/messages');
     }
 
+    static async getConversation(userId) {
+        return this.request(`/api/messages/conversation/${userId}`);
+    }
+
     static async markMessageRead(messageId) {
         return this.request(`/api/messages/${messageId}/read`, {
             method: 'PUT'

@@ -379,6 +379,30 @@ app.get('/api/messages', async (req, res) => {
     }
 });
 
+// 获取与某个用户的完整对话（包括发送和接收）
+app.get('/api/messages/conversation/:userId', async (req, res) => {
+    try {
+        if (!req.session.userId) {
+            return res.status(401).json({ error: '未登录' });
+        }
+        
+        const otherUserId = req.params.userId;
+        
+        // 获取双向消息
+        const messages = await Message.find({
+            $or: [
+                { fromUserId: req.session.userId, toUserId: otherUserId },
+                { fromUserId: otherUserId, toUserId: req.session.userId }
+            ]
+        }).sort({ createdAt: 1 }); // 按时间正序排列
+        
+        res.json({ messages });
+    } catch (error) {
+        console.error('获取对话错误:', error);
+        res.status(500).json({ error: '获取对话失败' });
+    }
+});
+
 // 标记留言为已读
 app.put('/api/messages/:id/read', async (req, res) => {
     try {
