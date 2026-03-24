@@ -25,6 +25,9 @@ const io = socketIo(server, {
     pingInterval: 25000
 });
 
+// 信任代理（Railway使用反向代理）
+app.set('trust proxy', 1);
+
 // 中间件
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
@@ -48,7 +51,8 @@ const sessionMiddleware = session({
     cookie: {
         maxAge: 1000 * 60 * 60 * 24 * 7, // 7天
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production'
+        secure: false, // Railway使用代理，设置为false
+        sameSite: 'lax'
     }
 });
 
