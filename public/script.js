@@ -467,15 +467,16 @@ function renderConversationMessage(msg, currentUserId) {
     
     return `
         <div class="conversation-message ${alignClass} ${!msg.isRead && !isOwn ? 'unread' : ''}" data-message-id="${msg._id}">
+            ${!isOwn ? `<div class="message-username">${msg.fromUsername}</div>` : ''}
             ${msg.replyToContent || msg.originalCardContent ? `
             <div class="message-context">
                 ${msg.replyToContent ? `回复: "${msg.replyToContent}"` : `回复卡片: "${msg.originalCardContent}"`}
             </div>
             ` : ''}
-            <div class="message-bubble">
-                <div class="message-content">${msg.content}</div>
-                <div class="message-time">${Utils.formatDate(msg.createdAt)}</div>
+            <div class="message-text-content">
+                ${msg.content}
             </div>
+            <div class="message-time">${Utils.formatDate(msg.createdAt)}</div>
         </div>
     `;
 }
