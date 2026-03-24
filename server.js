@@ -99,7 +99,7 @@ app.post('/api/register', async (req, res) => {
         res.json({
             success: true,
             user: {
-                id: user._id,
+                _id: user._id,
                 username: user.username,
                 bio: user.bio,
                 gender: user.gender
@@ -143,7 +143,7 @@ app.post('/api/login', async (req, res) => {
         res.json({
             success: true,
             user: {
-                id: user._id,
+                _id: user._id,
                 username: user.username,
                 bio: user.bio,
                 gender: user.gender
@@ -202,7 +202,7 @@ app.put('/api/user/profile', async (req, res) => {
         res.json({
             success: true,
             user: {
-                id: user._id,
+                _id: user._id,
                 username: user.username,
                 bio: user.bio,
                 gender: user.gender
