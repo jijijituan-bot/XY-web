@@ -396,6 +396,77 @@ function bindChatEvents() {
         
         startChatMatching(nickname, gender);
     });
+    
+    // 取消匹配
+    document.getElementById('cancelMatchBtn').addEventListener('click', () => {
+        if (appState.socket) {
+            appState.socket.emit('cancelMatching');
+        }
+        PageManager.showPage('main');
+        PageManager.showTab('chat');
+        Utils.showToast('已取消匹配', 'info');
+    });
+    
+    // 结束聊天
+    document.getElementById('endChatBtn').addEventListener('click', () => {
+        if (!confirm('确定要结束聊天吗？')) return;
+        
+        if (appState.socket) {
+            appState.socket.emit('endChat');
+        }
+        
+        document.getElementById('chatMessages').innerHTML = '';
+        PageManager.showPage('main');
+        PageManager.showTab('chat');
+        Utils.showToast('已结束聊天', 'info');
+    });
+    
+    // 发送消息
+    document.getElementById('sendMessageBtn').addEventListener('click', () => {
+        sendChatMessage();
+    });
+    
+    document.getElementById('messageText').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendChatMessage();
+        }
+    });
+    
+    // 输入状态
+    let typingTimer;
+    document.getElementById('messageText').addEventListener('input', () => {
+        if (appState.socket) {
+            appState.socket.emit('typing');
+            clearTimeout(typingTimer);
+            typingTimer = setTimeout(() => {
+                appState.socket.emit('stopTyping');
+            }, 1000);
+        }
+    });
+    
+    // 上传照片
+    document.getElementById('uploadPhotoBtn').addEventListener('click', () => {
+        document.getElementById('photoInput').click();
+    });
+    
+    document.getElementById('photoInput').addEventListener('change', (e) => {
+        handlePhotoUpload(e);
+    });
+    
+    // 表情包
+    document.getElementById('showEmojiBtn').addEventListener('click', () => {
+        document.getElementById('emojiPanel').classList.toggle('show');
+    });
+    
+    document.querySelectorAll('.emoji').forEach(emoji => {
+        emoji.addEventListener('click', () => {
+            const textarea = document.getElementById('messageText');
+            textarea.value += emoji.textContent;
+            textarea.focus();
+            document.getElementById('emojiPanel').classList.remove('show');
+        });
+    });
 }
 
 function startChatMatching(nickname, gender) {
@@ -444,6 +515,107 @@ function setupSocketEvents() {
             PageManager.showTab('chat');
         }, 2000);
     });
+    
+    socket.on('chatEnded', (data) => {
+        addSystemMessage(data.message);
+        setTimeout(() => {
+            PageManager.showPage('main');
+            PageManager.showTab('chat');
+        }, 2000);
+    });
+}
+
+function sendChatMessage() {
+    const textarea = document.getElementById('messageText');
+    const message = textarea.value.trim();
+    
+    if (!message || !appState.socket) return;
+    
+    // 发送消息
+    appState.socket.emit('sendMessage', {
+        content: message,
+        type: 'text'
+    });
+    
+    // 显示自己的消息
+    addChatMessage(message, true);
+    
+    // 清空输入框
+    textarea.value = '';
+    textarea.style.height = 'auto';
+}
+
+function handlePhotoUpload(event) {
+    const file = event.target.files[0];
+    if (!file || !appState.socket) return;
+    
+    if (!file.type.startsWith('image/')) {
+        Utils.showToast('请选择图片文件', 'error');
+        return;
+    }
+    
+    if (file.size > 10 * 1024 * 1024) {
+        Utils.showToast('图片大小不能超过10MB', 'error');
+        return;
+    }
+    
+    Utils.showToast('正在处理图片...', 'info');
+    
+    compressImage(file, (compressedDataUrl) => {
+        // 发送图片
+        appState.socket.emit('sendMessage', {
+            content: compressedDataUrl,
+            type: 'image'
+        });
+        
+        // 显示自己的图片
+        addChatMessage(compressedDataUrl, true, true);
+    });
+    
+    // 清空文件输入
+    event.target.value = '';
+}
+
+function compressImage(file, callback) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+            const canvas = document.createElement('canvas');
+            let width = img.width;
+            let height = img.height;
+            
+            const maxSize = 800;
+            if (width > height) {
+                if (width > maxSize) {
+                    height = (height * maxSize) / width;
+                    width = maxSize;
+                }
+            } else {
+                if (height > maxSize) {
+                    width = (width * maxSize) / height;
+                    height = maxSize;
+                }
+            }
+            
+            canvas.width = width;
+            canvas.height = height;
+            
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+            
+            const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.7);
+            callback(compressedDataUrl);
+        };
+        img.onerror = () => {
+            Utils.showToast('图片加载失败', 'error');
+        };
+        img.src = e.target.result;
+    };
+    reader.onerror = () => {
+        Utils.showToast('图片读取失败', 'error');
+    };
+    reader.readAsDataURL(file);
 }
 
 // 模态框事件
