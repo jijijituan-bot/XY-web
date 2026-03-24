@@ -432,16 +432,11 @@ app.get('/api/messages/conversation/:userId', async (req, res) => {
         console.log('当前用户ID:', currentUserId, 'Type:', typeof currentUserId);
         console.log('对方用户ID:', otherUserId, 'Type:', typeof otherUserId);
         
-        // 确保 ID 格式正确 - 转换为 ObjectId
-        const mongoose = require('mongoose');
-        const currentUserObjectId = mongoose.Types.ObjectId(currentUserId);
-        const otherUserObjectId = mongoose.Types.ObjectId(otherUserId);
-        
-        // 获取双向消息
+        // 获取双向消息 - Mongoose 会自动处理 ObjectId 转换
         const messages = await Message.find({
             $or: [
-                { fromUserId: currentUserObjectId, toUserId: otherUserObjectId },
-                { fromUserId: otherUserObjectId, toUserId: currentUserObjectId }
+                { fromUserId: currentUserId, toUserId: otherUserId },
+                { fromUserId: otherUserId, toUserId: currentUserId }
             ]
         }).sort({ createdAt: 1 }); // 按时间正序排列
         
