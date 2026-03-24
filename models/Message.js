@@ -24,6 +24,10 @@ const messageSchema = new mongoose.Schema({
         ref: 'Card',
         required: true
     },
+    originalCardContent: {
+        type: String,
+        default: ''
+    },
     content: {
         type: String,
         required: true,

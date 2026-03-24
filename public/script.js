@@ -357,6 +357,12 @@ function renderMessages() {
                 <strong>${msg.fromUsername}</strong>
                 <span class="message-time">${Utils.formatDate(msg.createdAt)}</span>
             </div>
+            ${msg.originalCardContent ? `
+            <div class="message-original">
+                <div class="original-label">回复你的卡片：</div>
+                <div class="original-content">${msg.originalCardContent}</div>
+            </div>
+            ` : ''}
             <div class="message-content">
                 <p>${msg.content}</p>
             </div>

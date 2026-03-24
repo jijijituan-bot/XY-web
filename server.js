@@ -327,6 +327,7 @@ app.post('/api/messages', async (req, res) => {
             toUserId: toUser._id,
             toUsername: toUser.username,
             cardId: card._id,
+            originalCardContent: card.content, // 保存原始卡片内容
             content: content.trim()
         });
         
