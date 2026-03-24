@@ -1,7 +1,7 @@
 {
-  "name": "anonymous-chat",
+  "name": "xindong-shushuo",
   "version": "2.0.0",
-  "description": "匿名随机匹配聊天系统 - 带用户系统和卡片功能",
+  "description": "心洞述说 - 随机匹配聊天系统",
   "main": "server.js",
   "engines": {
     "node": ">=18.0.0"

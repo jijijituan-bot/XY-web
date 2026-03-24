@@ -626,5 +626,5 @@ app.get('/api/stats', (req, res) => {
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
     console.log(`🚀 服务器运行在 http://localhost:${PORT}`);
-    console.log('✨ 匿名聊天系统已启动（带用户系统）');
+    console.log('✨ 心洞述说系统已启动（带用户系统）');
 });
