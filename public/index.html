@@ -5,57 +5,209 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>匿名聊天 - 随机匹配</title>
+    <title>匿名社交 - 随机匹配</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- 首页 -->
-    <div id="homepage" class="page active">
+    <!-- 加载动画 -->
+    <div id="loading" class="loading-screen">
+        <div class="spinner"></div>
+        <p>加载中...</p>
+    </div>
+
+    <!-- 登录/注册页面 -->
+    <div id="authPage" class="page">
         <div class="container">
-            <h1>匿名聊天室</h1>
+            <h1>匿名社交</h1>
             <p>与陌生人随机匹配，开始有趣的对话</p>
+            
+            <!-- 登录表单 -->
+            <div id="loginForm" class="auth-form active">
+                <h2>登录</h2>
+                <div class="form-group">
+                    <input type="text" id="loginUsername" placeholder="用户名" maxlength="20">
+                </div>
+                <div class="form-group">
+                    <input type="password" id="loginPassword" placeholder="密码" minlength="6">
+                </div>
+                <button id="loginBtn" class="btn-primary">登录</button>
+                <p class="switch-form">还没有账号？<a href="#" id="showRegister">立即注册</a></p>
+            </div>
+            
+            <!-- 注册表单 -->
+            <div id="registerForm" class="auth-form">
+                <h2>注册</h2>
+                <div class="form-group">
+                    <input type="text" id="registerUsername" placeholder="用户名（3-20字符）" maxlength="20">
+                </div>
+                <div class="form-group">
+                    <input type="password" id="registerPassword" placeholder="密码（至少6字符）" minlength="6">
+                </div>
+                <div class="form-group">
+                    <input type="password" id="registerPasswordConfirm" placeholder="确认密码" minlength="6">
+                </div>
+                <button id="registerBtn" class="btn-primary">注册</button>
+                <p class="switch-form">已有账号？<a href="#" id="showLogin">立即登录</a></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 个人资料设置页面 -->
+    <div id="profileSetupPage" class="page">
+        <div class="container">
+            <h1>完善资料</h1>
+            <p>让其他人更了解你</p>
             
             <div class="form-group">
                 <label>选择性别：</label>
                 <div class="gender-options">
                     <label class="gender-label">
-                        <input type="radio" id="male" name="gender" value="male">
+                        <input type="radio" name="profileGender" value="male">
                         <span>男</span>
                     </label>
                     <label class="gender-label">
-                        <input type="radio" id="female" name="gender" value="female">
+                        <input type="radio" name="profileGender" value="female">
                         <span>女</span>
                     </label>
                     <label class="gender-label">
-                        <input type="radio" id="other" name="gender" value="other">
+                        <input type="radio" name="profileGender" value="other" checked>
                         <span>其他</span>
                     </label>
                 </div>
             </div>
             
             <div class="form-group">
-                <label for="nickname">昵称：</label>
-                <input type="text" id="nickname" placeholder="输入你的昵称" maxlength="20">
+                <label for="profileBio">个人简介（最多500字）：</label>
+                <textarea id="profileBio" placeholder="介绍一下自己吧..." maxlength="500" rows="6"></textarea>
+                <div class="char-count"><span id="bioCharCount">0</span>/500</div>
             </div>
             
-            <button id="startMatch" class="btn-primary">开始匹配</button>
+            <button id="saveProfileBtn" class="btn-primary">保存并继续</button>
+            <button id="skipProfileBtn" class="btn-secondary">跳过</button>
         </div>
     </div>
 
-    <!-- 匹配页面 -->
-    <div id="matching" class="page">
+    <!-- 主页面 -->
+    <div id="mainPage" class="page">
+        <!-- 顶部导航 -->
+        <div class="top-nav">
+            <div class="nav-item" data-tab="cards">
+                <span class="icon">🎴</span>
+                <span>发现</span>
+            </div>
+            <div class="nav-item" data-tab="messages">
+                <span class="icon">💬</span>
+                <span>留言</span>
+                <span class="badge" id="messageBadge">0</span>
+            </div>
+            <div class="nav-item" data-tab="chat">
+                <span class="icon">💭</span>
+                <span>聊天</span>
+            </div>
+            <div class="nav-item" data-tab="profile">
+                <span class="icon">👤</span>
+                <span>我的</span>
+            </div>
+        </div>
+
+        <!-- 卡片浏览标签页 -->
+        <div id="cardsTab" class="tab-content active">
+            <div class="cards-container">
+                <div id="cardStack" class="card-stack">
+                    <!-- 卡片将动态加载 -->
+                    <div class="no-cards">
+                        <p>暂无更多卡片</p>
+                        <button id="refreshCardsBtn" class="btn-secondary">刷新</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 留言标签页 -->
+        <div id="messagesTab" class="tab-content">
+            <div class="messages-container">
+                <h2>收到的留言</h2>
+                <div id="messagesList" class="messages-list">
+                    <!-- 留言将动态加载 -->
+                </div>
+            </div>
+        </div>
+
+        <!-- 聊天标签页 -->
+        <div id="chatTab" class="tab-content">
+            <div class="chat-match-container">
+                <h2>随机匹配聊天</h2>
+                <p>与陌生人进行实时匿名聊天</p>
+                
+                <div class="form-group">
+                    <label>选择性别：</label>
+                    <div class="gender-options">
+                        <label class="gender-label">
+                            <input type="radio" name="chatGender" value="male">
+                            <span>男</span>
+                        </label>
+                        <label class="gender-label">
+                            <input type="radio" name="chatGender" value="female">
+                            <span>女</span>
+                        </label>
+                        <label class="gender-label">
+                            <input type="radio" name="chatGender" value="other" checked>
+                            <span>其他</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="chatNickname">昵称：</label>
+                    <input type="text" id="chatNickname" placeholder="输入聊天昵称" maxlength="20">
+                </div>
+                
+                <button id="startChatMatchBtn" class="btn-primary">开始匹配</button>
+            </div>
+        </div>
+
+        <!-- 个人中心标签页 -->
+        <div id="profileTab" class="tab-content">
+            <div class="profile-container">
+                <div class="profile-header">
+                    <h2 id="profileUsername">用户名</h2>
+                    <span class="profile-gender" id="profileGenderDisplay"></span>
+                </div>
+                
+                <div class="profile-section">
+                    <h3>我的卡片</h3>
+                    <div id="myCardPreview" class="my-card-preview">
+                        <p class="no-card">还没有创建卡片</p>
+                    </div>
+                    <button id="editCardBtn" class="btn-primary">编辑卡片</button>
+                </div>
+                
+                <div class="profile-section">
+                    <h3>个人资料</h3>
+                    <button id="editProfileBtn" class="btn-secondary">编辑资料</button>
+                </div>
+                
+                <div class="profile-section">
+                    <button id="logoutBtn" class="btn-danger">退出登录</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 匹配中页面 -->
+    <div id="matchingPage" class="page">
         <div class="container">
             <div class="matching-animation">
                 <div class="spinner"></div>
                 <h2>正在为你寻找聊天伙伴...</h2>
                 <p>请稍等片刻</p>
-                <button id="cancelMatch" class="btn-secondary">取消匹配</button>
+                <button id="cancelMatchBtn" class="btn-secondary">取消匹配</button>
             </div>
         </div>
     </div>
 
-    <!-- 聊天页面 -->
-    <div id="chatroom" class="page">
+    <!-- 聊天室页面 -->
+    <div id="chatroomPage" class="page">
         <div class="chat-header">
             <div class="partner-info">
                 <span id="partnerName">陌生人</span>
@@ -63,26 +215,23 @@
                 <span class="status online">在线</span>
                 <span id="typingIndicator" class="typing-indicator">正在输入...</span>
             </div>
-            <button id="endChat" class="btn-danger">结束聊天</button>
+            <button id="endChatBtn" class="btn-danger">结束</button>
         </div>
         
-        <div class="chat-messages" id="chatMessages">
-            <!-- 消息将在这里显示 -->
-        </div>
+        <div class="chat-messages" id="chatMessages"></div>
         
         <div class="chat-input">
             <div class="input-tools">
-                <button id="uploadPhoto" class="tool-btn" title="上传照片">📷</button>
-                <button id="showEmoji" class="tool-btn" title="表情包">😊</button>
+                <button id="uploadPhotoBtn" class="tool-btn" title="上传照片">📷</button>
+                <button id="showEmojiBtn" class="tool-btn" title="表情包">😊</button>
                 <input type="file" id="photoInput" accept="image/*" style="display: none;">
             </div>
             <div class="message-input">
                 <textarea id="messageText" placeholder="输入消息..." rows="1"></textarea>
-                <button id="sendMessage" class="btn-send">发送</button>
+                <button id="sendMessageBtn" class="btn-send">发送</button>
             </div>
         </div>
         
-        <!-- 表情包面板 -->
         <div id="emojiPanel" class="emoji-panel">
             <div class="emoji-grid">
                 <span class="emoji">😀</span><span class="emoji">😂</span><span class="emoji">😍</span><span class="emoji">😊</span>
@@ -94,7 +243,50 @@
         </div>
     </div>
 
+    <!-- 卡片编辑模态框 -->
+    <div id="cardModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>编辑我的卡片</h2>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="cardContent">卡片内容（最多500字）：</label>
+                    <textarea id="cardContent" placeholder="介绍一下自己，让别人了解你..." maxlength="500" rows="8"></textarea>
+                    <div class="char-count"><span id="cardCharCount">0</span>/500</div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="saveCardBtn" class="btn-primary">保存</button>
+                <button class="modal-cancel btn-secondary">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 留言模态框 -->
+    <div id="messageModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>发送留言</h2>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>给 <strong id="messageToUser"></strong> 留言：</p>
+                <div class="form-group">
+                    <textarea id="messageContent" placeholder="写下你想说的话..." maxlength="500" rows="6"></textarea>
+                    <div class="char-count"><span id="messageCharCount">0</span>/500</div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="sendMessageModalBtn" class="btn-primary">发送</button>
+                <button class="modal-cancel btn-secondary">取消</button>
+            </div>
+        </div>
+    </div>
+
     <script src="/socket.io/socket.io.js"></script>
+    <script src="app.js"></script>
     <script src="script.js"></script>
 </body>
 </html>

@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>匿名聊天 - 随机匹配</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- 首页 -->
+    <div id="homepage" class="page active">
+        <div class="container">
+            <h1>匿名聊天室</h1>
+            <p>与陌生人随机匹配，开始有趣的对话</p>
+            
+            <div class="form-group">
+                <label>选择性别：</label>
+                <div class="gender-options">
+                    <label class="gender-label">
+                        <input type="radio" id="male" name="gender" value="male">
+                        <span>男</span>
+                    </label>
+                    <label class="gender-label">
+                        <input type="radio" id="female" name="gender" value="female">
+                        <span>女</span>
+                    </label>
+                    <label class="gender-label">
+                        <input type="radio" id="other" name="gender" value="other">
+                        <span>其他</span>
+                    </label>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="nickname">昵称：</label>
+                <input type="text" id="nickname" placeholder="输入你的昵称" maxlength="20">
+            </div>
+            
+            <button id="startMatch" class="btn-primary">开始匹配</button>
+        </div>
+    </div>
+
+    <!-- 匹配页面 -->
+    <div id="matching" class="page">
+        <div class="container">
+            <div class="matching-animation">
+                <div class="spinner"></div>
+                <h2>正在为你寻找聊天伙伴...</h2>
+                <p>请稍等片刻</p>
+                <button id="cancelMatch" class="btn-secondary">取消匹配</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 聊天页面 -->
+    <div id="chatroom" class="page">
+        <div class="chat-header">
+            <div class="partner-info">
+                <span id="partnerName">陌生人</span>
+                <span id="partnerGender" class="partner-gender"></span>
+                <span class="status online">在线</span>
+                <span id="typingIndicator" class="typing-indicator">正在输入...</span>
+            </div>
+            <button id="endChat" class="btn-danger">结束聊天</button>
+        </div>
+        
+        <div class="chat-messages" id="chatMessages">
+            <!-- 消息将在这里显示 -->
+        </div>
+        
+        <div class="chat-input">
+            <div class="input-tools">
+                <button id="uploadPhoto" class="tool-btn" title="上传照片">📷</button>
+                <button id="showEmoji" class="tool-btn" title="表情包">😊</button>
+                <input type="file" id="photoInput" accept="image/*" style="display: none;">
+            </div>
+            <div class="message-input">
+                <textarea id="messageText" placeholder="输入消息..." rows="1"></textarea>
+                <button id="sendMessage" class="btn-send">发送</button>
+            </div>
+        </div>
+        
+        <!-- 表情包面板 -->
+        <div id="emojiPanel" class="emoji-panel">
+            <div class="emoji-grid">
+                <span class="emoji">😀</span><span class="emoji">😂</span><span class="emoji">😍</span><span class="emoji">😊</span>
+                <span class="emoji">😎</span><span class="emoji">😭</span><span class="emoji">😱</span><span class="emoji">😴</span>
+                <span class="emoji">🤔</span><span class="emoji">😤</span><span class="emoji">😇</span><span class="emoji">🥰</span>
+                <span class="emoji">👍</span><span class="emoji">👎</span><span class="emoji">👋</span><span class="emoji">🙏</span>
+                <span class="emoji">❤️</span><span class="emoji">💔</span><span class="emoji">🔥</span><span class="emoji">⭐</span>
+            </div>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
