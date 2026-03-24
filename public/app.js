@@ -103,10 +103,10 @@ class API {
         return this.request(`/api/cards/user/${userId}`);
     }
 
-    static async sendMessage(toUserId, cardId, content) {
+    static async sendMessage(toUserId, cardId, content, replyToMessageId = null) {
         return this.request('/api/messages', {
             method: 'POST',
-            body: JSON.stringify({ toUserId, cardId, content })
+            body: JSON.stringify({ toUserId, cardId, content, replyToMessageId })
         });
     }
 
@@ -117,6 +117,12 @@ class API {
     static async markMessageRead(messageId) {
         return this.request(`/api/messages/${messageId}/read`, {
             method: 'PUT'
+        });
+    }
+
+    static async deleteMessagesFromUser(userId) {
+        return this.request(`/api/messages/user/${userId}`, {
+            method: 'DELETE'
         });
     }
 }

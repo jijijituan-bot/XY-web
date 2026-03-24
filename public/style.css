@@ -1066,6 +1066,16 @@ p {
     background: rgba(113, 128, 150, 0.3);
 }
 
+.message-group-actions .btn-delete {
+    background: rgba(229, 62, 62, 0.2);
+    color: #c53030;
+}
+
+.message-group-actions .btn-delete:hover {
+    background: rgba(229, 62, 62, 0.3);
+    transform: translateY(-1px);
+}
+
 .message-time {
     font-size: 12px;
     color: #a0aec0;

@@ -28,6 +28,15 @@ const messageSchema = new mongoose.Schema({
         type: String,
         default: ''
     },
+    parentMessageId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Message',
+        default: null
+    },
+    replyToContent: {
+        type: String,
+        default: ''
+    },
     content: {
         type: String,
         required: true,

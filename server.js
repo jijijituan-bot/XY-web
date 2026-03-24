@@ -303,7 +303,7 @@ app.post('/api/messages', async (req, res) => {
             return res.status(401).json({ error: '未登录' });
         }
         
-        const { toUserId, cardId, content } = req.body;
+        const { toUserId, cardId, content, replyToMessageId } = req.body;
         
         if (!content || content.trim().length === 0) {
             return res.status(400).json({ error: '留言内容不能为空' });
@@ -323,19 +323,36 @@ app.post('/api/messages', async (req, res) => {
         
         console.log('发送留言 - 卡片内容:', card.content);
         
-        const message = new Message({
+        // 构建留言对象
+        const messageData = {
             fromUserId: fromUser._id,
             fromUsername: fromUser.username,
             toUserId: toUser._id,
             toUsername: toUser.username,
             cardId: card._id,
-            originalCardContent: card.content, // 保存原始卡片内容
             content: content.trim()
-        });
+        };
         
+        // 如果是回复某条留言
+        if (replyToMessageId) {
+            const parentMessage = await Message.findById(replyToMessageId);
+            if (parentMessage) {
+                messageData.parentMessageId = parentMessage._id;
+                messageData.replyToContent = parentMessage.content; // 保存被回复的留言内容
+                // 如果父留言有原始卡片内容，继承它
+                if (parentMessage.originalCardContent) {
+                    messageData.originalCardContent = parentMessage.originalCardContent;
+                }
+            }
+        } else {
+            // 首次留言，保存原始卡片内容
+            messageData.originalCardContent = card.content;
+        }
+        
+        const message = new Message(messageData);
         await message.save();
         
-        console.log('留言已保存，包含原始内容:', message.originalCardContent);
+        console.log('留言已保存:', message);
         
         res.json({ success: true, message });
     } catch (error) {
@@ -385,6 +402,25 @@ app.put('/api/messages/:id/read', async (req, res) => {
     } catch (error) {
         console.error('标记已读错误:', error);
         res.status(500).json({ error: '操作失败' });
+    }
+});
+
+// 删除来自某个用户的所有留言
+app.delete('/api/messages/user/:userId', async (req, res) => {
+    try {
+        if (!req.session.userId) {
+            return res.status(401).json({ error: '未登录' });
+        }
+        
+        const result = await Message.deleteMany({
+            toUserId: req.session.userId,
+            fromUserId: req.params.userId
+        });
+        
+        res.json({ success: true, deletedCount: result.deletedCount });
+    } catch (error) {
+        console.error('删除留言错误:', error);
+        res.status(500).json({ error: '删除失败' });
     }
 });
 

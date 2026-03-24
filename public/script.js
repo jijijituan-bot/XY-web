@@ -383,7 +383,12 @@ function renderMessages() {
             <div class="message-group-content">
                 ${userGroup.messages.map(msg => `
                     <div class="message-detail ${msg.isRead ? 'read' : 'unread'}" data-message-id="${msg._id}">
-                        ${msg.originalCardContent ? `
+                        ${msg.replyToContent ? `
+                        <div class="message-original">
+                            <div class="original-label">回复了你的留言</div>
+                            <div class="original-content">"${msg.replyToContent}"</div>
+                        </div>
+                        ` : msg.originalCardContent ? `
                         <div class="message-original">
                             <div class="original-label">回复了你的卡片</div>
                             <div class="original-content">"${msg.originalCardContent}"</div>
@@ -400,8 +405,9 @@ function renderMessages() {
                 `).join('')}
             </div>
             <div class="message-group-actions">
-                <button class="btn-reply" data-user-id="${userGroup.userId}" data-username="${userGroup.username}">回复</button>
+                <button class="btn-reply" data-user-id="${userGroup.userId}" data-username="${userGroup.username}" data-latest-message-id="${latestMessage._id}">回复</button>
                 <button class="btn-mark-read" data-user-id="${userGroup.userId}">全部标为已读</button>
+                <button class="btn-delete" data-user-id="${userGroup.userId}" data-username="${userGroup.username}">删除</button>
             </div>
         </div>
         `;
@@ -412,9 +418,10 @@ function renderMessages() {
         btn.addEventListener('click', async (e) => {
             const userId = e.target.dataset.userId;
             const username = e.target.dataset.username;
+            const latestMessageId = e.target.dataset.latestMessageId;
             
-            // 显示回复模态框
-            showReplyModal(userId, username);
+            // 显示回复模态框，传递最新留言ID用于回复链
+            showReplyModal(userId, username, latestMessageId);
         });
     });
     
@@ -440,6 +447,30 @@ function renderMessages() {
             } catch (error) {
                 console.error('标记已读失败:', error);
                 Utils.showToast('操作失败', 'error');
+            }
+        });
+    });
+    
+    // 绑定删除按钮
+    document.querySelectorAll('.btn-delete').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+            const userId = e.target.dataset.userId;
+            const username = e.target.dataset.username;
+            
+            if (!confirm(`确定要删除来自 ${username} 的所有留言吗？`)) {
+                return;
+            }
+            
+            try {
+                Utils.showLoading();
+                await API.deleteMessagesFromUser(userId);
+                await loadMessages(); // 重新加载留言列表
+                Utils.showToast('删除成功', 'success');
+            } catch (error) {
+                console.error('删除留言失败:', error);
+                Utils.showToast('删除失败', 'error');
+            } finally {
+                Utils.hideLoading();
             }
         });
     });
@@ -482,7 +513,7 @@ function updateMessageBadge() {
     }
 }
 
-function showMessageModal(userId, cardId, username) {
+function showMessageModal(userId, cardId, username, replyToMessageId = null) {
     document.getElementById('messageToUser').textContent = username;
     document.getElementById('messageContent').value = '';
     document.getElementById('messageCharCount').textContent = '0';
@@ -490,7 +521,7 @@ function showMessageModal(userId, cardId, username) {
     PageManager.showModal('messageModal');
     
     // 保存当前留言目标
-    window.currentMessageTarget = { userId, cardId };
+    window.currentMessageTarget = { userId, cardId, replyToMessageId };
     
     // 重新绑定发送按钮事件（确保事件监听器生效）
     const sendBtn = document.getElementById('sendMessageModalBtn');
@@ -519,7 +550,8 @@ function showMessageModal(userId, cardId, username) {
                 await API.sendMessage(
                     window.currentMessageTarget.userId,
                     window.currentMessageTarget.cardId,
-                    content
+                    content,
+                    window.currentMessageTarget.replyToMessageId // 传递回复链ID
                 );
                 Utils.showToast('留言发送成功！', 'success');
                 PageManager.hideAllModals();
@@ -556,13 +588,13 @@ function showMessageModal(userId, cardId, username) {
     });
 }
 
-async function showReplyModal(userId, username) {
+async function showReplyModal(userId, username, replyToMessageId = null) {
     // 获取对方的卡片ID
     try {
         const data = await API.getUserCard(userId);
         
         if (data.card) {
-            showMessageModal(userId, data.card._id, username);
+            showMessageModal(userId, data.card._id, username, replyToMessageId);
         } else {
             Utils.showToast('该用户还没有创建卡片', 'error');
         }
