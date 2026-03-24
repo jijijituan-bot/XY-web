@@ -683,81 +683,102 @@ function compressImage(file, callback) {
 
 // 模态框事件
 function bindModalEvents() {
-    // 关闭模态框
-    document.querySelectorAll('.modal-close, .modal-cancel').forEach(btn => {
-        btn.addEventListener('click', () => {
+    // 使用事件委托处理模态框关闭按钮
+    document.body.addEventListener('click', (e) => {
+        // 关闭按钮
+        if (e.target.classList.contains('modal-close') || e.target.classList.contains('modal-cancel')) {
+            e.preventDefault();
+            e.stopPropagation();
             PageManager.hideAllModals();
-        });
-    });
-    
-    // 点击模态框外部关闭
-    document.querySelectorAll('.modal').forEach(modal => {
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) {
-                PageManager.hideAllModals();
-            }
-        });
+            return;
+        }
+        
+        // 点击模态框外部关闭
+        if (e.target.classList.contains('modal')) {
+            PageManager.hideAllModals();
+        }
     });
     
     // 保存卡片
-    document.getElementById('saveCardBtn').addEventListener('click', async () => {
-        const content = document.getElementById('cardContent').value.trim();
-        
-        if (!content) {
-            Utils.showToast('请填写卡片内容', 'error');
-            return;
-        }
-        
-        try {
-            Utils.showLoading();
-            await API.createCard(content);
-            Utils.showToast('卡片保存成功！', 'success');
-            PageManager.hideAllModals();
-        } catch (error) {
-            Utils.showToast(error.message, 'error');
-        } finally {
-            Utils.hideLoading();
-        }
-    });
+    const saveCardBtn = document.getElementById('saveCardBtn');
+    if (saveCardBtn) {
+        saveCardBtn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const content = document.getElementById('cardContent').value.trim();
+            
+            if (!content) {
+                Utils.showToast('请填写卡片内容', 'error');
+                return;
+            }
+            
+            try {
+                Utils.showLoading();
+                await API.createCard(content);
+                Utils.showToast('卡片保存成功！', 'success');
+                PageManager.hideAllModals();
+            } catch (error) {
+                Utils.showToast(error.message, 'error');
+            } finally {
+                Utils.hideLoading();
+            }
+        });
+    }
     
     // 发送留言
-    document.getElementById('sendMessageModalBtn').addEventListener('click', async () => {
-        const content = document.getElementById('messageContent').value.trim();
-        
-        if (!content) {
-            Utils.showToast('请填写留言内容', 'error');
-            return;
-        }
-        
-        if (!window.currentMessageTarget) {
-            Utils.showToast('留言目标错误', 'error');
-            return;
-        }
-        
-        try {
-            Utils.showLoading();
-            await API.sendMessage(
-                window.currentMessageTarget.userId,
-                window.currentMessageTarget.cardId,
-                content
-            );
-            Utils.showToast('留言发送成功！', 'success');
-            PageManager.hideAllModals();
-        } catch (error) {
-            Utils.showToast(error.message, 'error');
-        } finally {
-            Utils.hideLoading();
-        }
-    });
+    const sendMessageBtn = document.getElementById('sendMessageModalBtn');
+    if (sendMessageBtn) {
+        sendMessageBtn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const content = document.getElementById('messageContent').value.trim();
+            
+            if (!content) {
+                Utils.showToast('请填写留言内容', 'error');
+                return;
+            }
+            
+            if (!window.currentMessageTarget) {
+                Utils.showToast('留言目标错误', 'error');
+                return;
+            }
+            
+            try {
+                Utils.showLoading();
+                await API.sendMessage(
+                    window.currentMessageTarget.userId,
+                    window.currentMessageTarget.cardId,
+                    content
+                );
+                Utils.showToast('留言发送成功！', 'success');
+                PageManager.hideAllModals();
+                // 清空输入框
+                document.getElementById('messageContent').value = '';
+                document.getElementById('messageCharCount').textContent = '0';
+            } catch (error) {
+                Utils.showToast(error.message, 'error');
+            } finally {
+                Utils.hideLoading();
+            }
+        });
+    }
     
     // 字符计数
-    document.getElementById('cardContent').addEventListener('input', (e) => {
-        document.getElementById('cardCharCount').textContent = e.target.value.length;
-    });
+    const cardContent = document.getElementById('cardContent');
+    if (cardContent) {
+        cardContent.addEventListener('input', (e) => {
+            document.getElementById('cardCharCount').textContent = e.target.value.length;
+        });
+    }
     
-    document.getElementById('messageContent').addEventListener('input', (e) => {
-        document.getElementById('messageCharCount').textContent = e.target.value.length;
-    });
+    const messageContent = document.getElementById('messageContent');
+    if (messageContent) {
+        messageContent.addEventListener('input', (e) => {
+            document.getElementById('messageCharCount').textContent = e.target.value.length;
+        });
+    }
 }
 
 // 聊天辅助函数
