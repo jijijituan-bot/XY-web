@@ -427,6 +427,69 @@ function showMessageModal(userId, cardId, username) {
     
     // 保存当前留言目标
     window.currentMessageTarget = { userId, cardId };
+    
+    // 重新绑定发送按钮事件（确保事件监听器生效）
+    const sendBtn = document.getElementById('sendMessageModalBtn');
+    if (sendBtn) {
+        // 移除旧的事件监听器
+        const newSendBtn = sendBtn.cloneNode(true);
+        sendBtn.parentNode.replaceChild(newSendBtn, sendBtn);
+        
+        // 添加新的事件监听器
+        newSendBtn.addEventListener('click', async () => {
+            console.log('发送留言按钮被点击');
+            const content = document.getElementById('messageContent').value.trim();
+            
+            if (!content) {
+                Utils.showToast('请填写留言内容', 'error');
+                return;
+            }
+            
+            if (!window.currentMessageTarget) {
+                Utils.showToast('留言目标错误', 'error');
+                return;
+            }
+            
+            try {
+                Utils.showLoading();
+                await API.sendMessage(
+                    window.currentMessageTarget.userId,
+                    window.currentMessageTarget.cardId,
+                    content
+                );
+                Utils.showToast('留言发送成功！', 'success');
+                PageManager.hideAllModals();
+                document.getElementById('messageContent').value = '';
+                document.getElementById('messageCharCount').textContent = '0';
+            } catch (error) {
+                Utils.showToast(error.message, 'error');
+            } finally {
+                Utils.hideLoading();
+            }
+        });
+    }
+    
+    // 重新绑定取消按钮
+    const modalCancelBtns = document.querySelectorAll('#messageModal .modal-cancel');
+    modalCancelBtns.forEach(btn => {
+        const newBtn = btn.cloneNode(true);
+        btn.parentNode.replaceChild(newBtn, btn);
+        newBtn.addEventListener('click', () => {
+            console.log('取消按钮被点击');
+            PageManager.hideAllModals();
+        });
+    });
+    
+    // 重新绑定关闭按钮
+    const modalCloseBtns = document.querySelectorAll('#messageModal .modal-close');
+    modalCloseBtns.forEach(btn => {
+        const newBtn = btn.cloneNode(true);
+        btn.parentNode.replaceChild(newBtn, btn);
+        newBtn.addEventListener('click', () => {
+            console.log('关闭按钮被点击');
+            PageManager.hideAllModals();
+        });
+    });
 }
 
 async function showReplyModal(userId, username) {
@@ -683,26 +746,22 @@ function compressImage(file, callback) {
 
 // 模态框事件
 function bindModalEvents() {
-    // 使用事件委托处理模态框关闭按钮
-    document.body.addEventListener('click', (e) => {
-        // 关闭按钮
-        if (e.target.classList.contains('modal-close') || e.target.classList.contains('modal-cancel')) {
-            e.preventDefault();
-            e.stopPropagation();
-            PageManager.hideAllModals();
-            return;
-        }
-        
-        // 点击模态框外部关闭
-        if (e.target.classList.contains('modal')) {
+    console.log('绑定模态框事件...');
+    
+    // 点击模态框外部关闭
+    document.addEventListener('click', (e) => {
+        if (e.target.classList.contains('modal') && e.target.classList.contains('show')) {
+            console.log('点击了模态框外部');
             PageManager.hideAllModals();
         }
     });
     
-    // 保存卡片
+    // 保存卡片按钮
     const saveCardBtn = document.getElementById('saveCardBtn');
     if (saveCardBtn) {
-        saveCardBtn.addEventListener('click', async (e) => {
+        console.log('找到保存卡片按钮');
+        saveCardBtn.addEventListener('click', async function(e) {
+            console.log('点击了保存卡片按钮');
             e.preventDefault();
             e.stopPropagation();
             
@@ -726,44 +785,14 @@ function bindModalEvents() {
         });
     }
     
-    // 发送留言
-    const sendMessageBtn = document.getElementById('sendMessageModalBtn');
-    if (sendMessageBtn) {
-        sendMessageBtn.addEventListener('click', async (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            
-            const content = document.getElementById('messageContent').value.trim();
-            
-            if (!content) {
-                Utils.showToast('请填写留言内容', 'error');
-                return;
-            }
-            
-            if (!window.currentMessageTarget) {
-                Utils.showToast('留言目标错误', 'error');
-                return;
-            }
-            
-            try {
-                Utils.showLoading();
-                await API.sendMessage(
-                    window.currentMessageTarget.userId,
-                    window.currentMessageTarget.cardId,
-                    content
-                );
-                Utils.showToast('留言发送成功！', 'success');
-                PageManager.hideAllModals();
-                // 清空输入框
-                document.getElementById('messageContent').value = '';
-                document.getElementById('messageCharCount').textContent = '0';
-            } catch (error) {
-                Utils.showToast(error.message, 'error');
-            } finally {
-                Utils.hideLoading();
-            }
+    // 卡片模态框的取消和关闭按钮
+    const cardModalCancelBtns = document.querySelectorAll('#cardModal .modal-cancel, #cardModal .modal-close');
+    cardModalCancelBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            console.log('卡片模态框关闭按钮被点击');
+            PageManager.hideAllModals();
         });
-    }
+    });
     
     // 字符计数
     const cardContent = document.getElementById('cardContent');
