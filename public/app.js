@@ -98,6 +98,10 @@ class API {
     static async getCards() {
         return this.request('/api/cards');
     }
+    
+    static async getUserCard(userId) {
+        return this.request(`/api/cards/user/${userId}`);
+    }
 
     static async sendMessage(toUserId, cardId, content) {
         return this.request('/api/messages', {

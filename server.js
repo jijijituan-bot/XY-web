@@ -274,6 +274,28 @@ app.get('/api/cards', async (req, res) => {
     }
 });
 
+// 获取指定用户的卡片
+app.get('/api/cards/user/:userId', async (req, res) => {
+    try {
+        if (!req.session.userId) {
+            return res.status(401).json({ error: '未登录' });
+        }
+        
+        const card = await Card.findOne({
+            userId: req.params.userId
+        });
+        
+        if (!card) {
+            return res.status(404).json({ error: '该用户还没有创建卡片' });
+        }
+        
+        res.json({ card });
+    } catch (error) {
+        console.error('获取用户卡片错误:', error);
+        res.status(500).json({ error: '获取卡片失败' });
+    }
+});
+
 // 发送留言
 app.post('/api/messages', async (req, res) => {
     try {

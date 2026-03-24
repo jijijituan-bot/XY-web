@@ -170,10 +170,15 @@ function bindProfileEvents() {
         
         try {
             Utils.showLoading();
-            const data = await API.updateProfile(bio, gender);
-            appState.setUser(data.user);
             
-            Utils.showToast('资料保存成功！', 'success');
+            // 保存个人资料
+            const profileData = await API.updateProfile(bio, gender);
+            appState.setUser(profileData.user);
+            
+            // 自动创建卡片（使用个人简介作为卡片内容）
+            await API.createCard(bio);
+            
+            Utils.showToast('资料保存成功！卡片已创建', 'success');
             PageManager.showPage('main');
             PageManager.showTab('cards');
             await loadUserData();
@@ -347,7 +352,7 @@ function renderMessages() {
     }
     
     messagesList.innerHTML = appState.messages.map(msg => `
-        <div class="message-item ${msg.isRead ? 'read' : 'unread'}">
+        <div class="message-item ${msg.isRead ? 'read' : 'unread'}" data-message-id="${msg._id}">
             <div class="message-header">
                 <strong>${msg.fromUsername}</strong>
                 <span class="message-time">${Utils.formatDate(msg.createdAt)}</span>
@@ -355,8 +360,50 @@ function renderMessages() {
             <div class="message-content">
                 <p>${msg.content}</p>
             </div>
+            <div class="message-actions">
+                <button class="btn-reply" data-user-id="${msg.fromUserId}" data-username="${msg.fromUsername}">回复</button>
+            </div>
         </div>
     `).join('');
+    
+    // 绑定回复按钮事件
+    document.querySelectorAll('.btn-reply').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+            const userId = e.target.dataset.userId;
+            const username = e.target.dataset.username;
+            const messageId = e.target.closest('.message-item').dataset.messageId;
+            
+            // 标记为已读
+            try {
+                await API.markMessageRead(messageId);
+                e.target.closest('.message-item').classList.remove('unread');
+                e.target.closest('.message-item').classList.add('read');
+                await loadMessages(); // 重新加载更新徽章
+            } catch (error) {
+                console.error('标记已读失败:', error);
+            }
+            
+            // 显示回复模态框（需要获取对方的卡片ID）
+            showReplyModal(userId, username);
+        });
+    });
+    
+    // 点击留言项标记为已读
+    document.querySelectorAll('.message-item.unread').forEach(item => {
+        item.addEventListener('click', async (e) => {
+            if (e.target.classList.contains('btn-reply')) return;
+            
+            const messageId = item.dataset.messageId;
+            try {
+                await API.markMessageRead(messageId);
+                item.classList.remove('unread');
+                item.classList.add('read');
+                await loadMessages(); // 重新加载更新徽章
+            } catch (error) {
+                console.error('标记已读失败:', error);
+            }
+        });
+    });
 }
 
 function updateMessageBadge() {
@@ -380,6 +427,22 @@ function showMessageModal(userId, cardId, username) {
     
     // 保存当前留言目标
     window.currentMessageTarget = { userId, cardId };
+}
+
+async function showReplyModal(userId, username) {
+    // 获取对方的卡片ID
+    try {
+        const data = await API.getUserCard(userId);
+        
+        if (data.card) {
+            showMessageModal(userId, data.card._id, username);
+        } else {
+            Utils.showToast('该用户还没有创建卡片', 'error');
+        }
+    } catch (error) {
+        console.error('获取卡片信息失败:', error);
+        Utils.showToast(error.message || '回复失败，请稍后重试', 'error');
+    }
 }
 
 // 聊天相关事件（保留原有功能）
