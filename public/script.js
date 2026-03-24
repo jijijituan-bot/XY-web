@@ -445,6 +445,12 @@ function renderMessages() {
         }
     });
     
+    console.log('=== 留言分组 ===');
+    console.log('分组后的用户:', Object.keys(messagesByUser).map(userId => ({
+        userId,
+        username: messagesByUser[userId].username
+    })));
+    
     // 渲染用户列表（默认折叠）
     messagesList.innerHTML = Object.values(messagesByUser).map(userInfo => {
         return `

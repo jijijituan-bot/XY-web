@@ -367,6 +367,11 @@ app.post('/api/messages', async (req, res) => {
             content: content.trim()
         };
         
+        console.log('=== 创建留言 ===');
+        console.log('发送者:', fromUser.username, 'ID:', String(fromUser._id));
+        console.log('接收者:', toUser.username, 'ID:', String(toUser._id));
+        console.log('内容:', content.substring(0, 30));
+        
         // 如果是回复某条留言
         if (replyToMessageId) {
             const parentMessage = await Message.findById(replyToMessageId);
@@ -421,19 +426,65 @@ app.get('/api/messages/conversation/:userId', async (req, res) => {
         }
         
         const otherUserId = req.params.userId;
+        const currentUserId = req.session.userId;
+        
+        console.log('=== 获取对话 API ===');
+        console.log('当前用户ID:', currentUserId, 'Type:', typeof currentUserId);
+        console.log('对方用户ID:', otherUserId, 'Type:', typeof otherUserId);
+        
+        // 确保 ID 格式正确 - 转换为 ObjectId
+        const mongoose = require('mongoose');
+        const currentUserObjectId = mongoose.Types.ObjectId(currentUserId);
+        const otherUserObjectId = mongoose.Types.ObjectId(otherUserId);
         
         // 获取双向消息
         const messages = await Message.find({
             $or: [
-                { fromUserId: req.session.userId, toUserId: otherUserId },
-                { fromUserId: otherUserId, toUserId: req.session.userId }
+                { fromUserId: currentUserObjectId, toUserId: otherUserObjectId },
+                { fromUserId: otherUserObjectId, toUserId: currentUserObjectId }
             ]
         }).sort({ createdAt: 1 }); // 按时间正序排列
+        
+        console.log('查询到的消息数量:', messages.length);
+        if (messages.length > 0) {
+            console.log('消息发送者ID列表:', messages.map(m => ({
+                from: String(m.fromUserId),
+                to: String(m.toUserId),
+                content: m.content.substring(0, 20)
+            })));
+        }
         
         res.json({ messages });
     } catch (error) {
         console.error('获取对话错误:', error);
         res.status(500).json({ error: '获取对话失败' });
+    }
+});
+
+// Debug endpoint - 获取所有消息（仅用于调试）
+app.get('/api/debug/messages', async (req, res) => {
+    try {
+        if (!req.session.userId) {
+            return res.status(401).json({ error: '未登录' });
+        }
+        
+        const allMessages = await Message.find({}).sort({ createdAt: -1 }).limit(20);
+        
+        res.json({
+            currentUserId: req.session.userId,
+            messages: allMessages.map(m => ({
+                id: m._id,
+                from: String(m.fromUserId),
+                fromUsername: m.fromUsername,
+                to: String(m.toUserId),
+                toUsername: m.toUsername,
+                content: m.content.substring(0, 30),
+                createdAt: m.createdAt
+            }))
+        });
+    } catch (error) {
+        console.error('Debug错误:', error);
+        res.status(500).json({ error: 'Debug失败' });
     }
 });
 
