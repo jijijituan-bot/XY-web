@@ -905,59 +905,138 @@ p {
     gap: 15px;
 }
 
-/* 留言列表 - 对话风格 */
+/* 留言列表 - 折叠式用户列表 */
 .messages-list {
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 8px;
 }
 
-.message-group {
+.message-user-item {
     background: rgba(255, 255, 255, 0.4);
     border: 1px solid rgba(26, 32, 44, 0.15);
-    border-radius: 15px;
-    padding: 15px;
+    border-radius: 12px;
+    overflow: hidden;
     backdrop-filter: blur(10px);
     transition: all 0.3s;
+    cursor: pointer;
 }
 
-.message-group.has-unread {
+.message-user-item:hover {
+    background: rgba(255, 255, 255, 0.5);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.message-user-item.has-unread {
     border-left: 4px solid #667eea;
     background: rgba(102, 126, 234, 0.08);
 }
 
-.message-group-header {
+.message-user-item.expanded {
+    background: rgba(255, 255, 255, 0.6);
+}
+
+.user-item-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 12px;
-    padding-bottom: 10px;
-    border-bottom: 1px solid rgba(26, 32, 44, 0.1);
+    padding: 12px 15px;
+    transition: background 0.2s;
 }
 
-.user-info {
+.user-item-header:hover {
+    background: rgba(0, 0, 0, 0.02);
+}
+
+.user-item-info {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
 }
 
-.user-info strong {
+.user-item-name {
     color: #1a202c;
-    font-size: 16px;
+    font-size: 15px;
+    font-weight: 600;
 }
 
-.unread-indicator {
-    font-size: 11px;
-    color: white;
+.unread-count {
     background: #667eea;
-    padding: 3px 8px;
+    color: white;
+    font-size: 11px;
+    padding: 2px 6px;
     border-radius: 10px;
     font-weight: bold;
+    min-width: 18px;
+    text-align: center;
 }
 
-.message-time {
-    font-size: 12px;
+.user-item-time {
+    font-size: 11px;
     color: #a0aec0;
+}
+
+.user-item-preview {
+    padding: 0 15px 12px 15px;
+    font-size: 13px;
+    color: #718096;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.conversation-detail {
+    border-top: 1px solid rgba(26, 32, 44, 0.1);
+    background: rgba(255, 255, 255, 0.3);
+    padding: 15px;
+}
+
+.conversation-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 15px;
+    padding-top: 12px;
+    border-top: 1px solid rgba(26, 32, 44, 0.1);
+}
+
+.conversation-actions button {
+    flex: 1;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 18px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-weight: 600;
+}
+
+.conversation-actions .btn-reply {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.9) 0%, rgba(118, 75, 162, 0.9) 100%);
+    color: white;
+}
+
+.conversation-actions .btn-reply:hover {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 1) 0%, rgba(118, 75, 162, 1) 100%);
+    transform: translateY(-1px);
+}
+
+.conversation-actions .btn-mark-read {
+    background: rgba(113, 128, 150, 0.2);
+    color: #4a5568;
+}
+
+.conversation-actions .btn-mark-read:hover {
+    background: rgba(113, 128, 150, 0.3);
+}
+
+.conversation-actions .btn-delete {
+    background: rgba(229, 62, 62, 0.2);
+    color: #c53030;
+}
+
+.conversation-actions .btn-delete:hover {
+    background: rgba(229, 62, 62, 0.3);
+    transform: translateY(-1px);
 }
 
 /* 对话容器 */
@@ -1155,53 +1234,6 @@ p {
     flex-direction: column;
     gap: 12px;
     margin-bottom: 12px;
-}
-
-.message-group-actions {
-    display: flex;
-    gap: 10px;
-    padding-top: 10px;
-    border-top: 1px solid rgba(26, 32, 44, 0.1);
-}
-
-.message-group-actions button {
-    flex: 1;
-    padding: 8px 16px;
-    border: none;
-    border-radius: 20px;
-    font-size: 13px;
-    cursor: pointer;
-    transition: all 0.3s;
-    font-weight: 600;
-}
-
-.message-group-actions .btn-reply {
-    background: linear-gradient(135deg, rgba(102, 126, 234, 0.9) 0%, rgba(118, 75, 162, 0.9) 100%);
-    color: white;
-}
-
-.message-group-actions .btn-reply:hover {
-    background: linear-gradient(135deg, rgba(102, 126, 234, 1) 0%, rgba(118, 75, 162, 1) 100%);
-    transform: translateY(-1px);
-}
-
-.message-group-actions .btn-mark-read {
-    background: rgba(113, 128, 150, 0.2);
-    color: #4a5568;
-}
-
-.message-group-actions .btn-mark-read:hover {
-    background: rgba(113, 128, 150, 0.3);
-}
-
-.message-group-actions .btn-delete {
-    background: rgba(229, 62, 62, 0.2);
-    color: #c53030;
-}
-
-.message-group-actions .btn-delete:hover {
-    background: rgba(229, 62, 62, 0.3);
-    transform: translateY(-1px);
 }
 
 .message-time {

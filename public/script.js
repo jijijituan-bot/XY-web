@@ -361,48 +361,74 @@ function renderMessages() {
                 username: msg.fromUsername,
                 userId: msg.fromUserId,
                 hasUnread: false,
-                latestTime: msg.createdAt
+                unreadCount: 0,
+                latestTime: msg.createdAt,
+                latestMessage: msg.content
             };
         }
         if (!msg.isRead) {
             messagesByUser[msg.fromUserId].hasUnread = true;
+            messagesByUser[msg.fromUserId].unreadCount++;
         }
     });
     
-    // 渲染用户列表
+    // 渲染用户列表（默认折叠）
     messagesList.innerHTML = Object.values(messagesByUser).map(userInfo => {
         return `
-        <div class="message-group ${userInfo.hasUnread ? 'has-unread' : ''}" data-user-id="${userInfo.userId}">
-            <div class="message-group-header">
-                <div class="user-info">
-                    <strong>${userInfo.username}</strong>
-                    ${userInfo.hasUnread ? '<span class="unread-indicator">有新留言</span>' : ''}
+        <div class="message-user-item ${userInfo.hasUnread ? 'has-unread' : ''}" data-user-id="${userInfo.userId}">
+            <div class="user-item-header">
+                <div class="user-item-info">
+                    <strong class="user-item-name">${userInfo.username}</strong>
+                    ${userInfo.hasUnread ? `<span class="unread-count">${userInfo.unreadCount}</span>` : ''}
                 </div>
-                <span class="message-time">${Utils.formatDate(userInfo.latestTime)}</span>
+                <span class="user-item-time">${Utils.formatDate(userInfo.latestTime)}</span>
             </div>
-            <div class="conversation-container" data-user-id="${userInfo.userId}">
+            <div class="user-item-preview">${userInfo.latestMessage}</div>
+            <div class="conversation-detail" style="display: none;" data-user-id="${userInfo.userId}">
                 <div class="loading-conversation">加载对话中...</div>
-            </div>
-            <div class="message-group-actions">
-                <button class="btn-reply" data-user-id="${userInfo.userId}" data-username="${userInfo.username}">回复</button>
-                <button class="btn-mark-read" data-user-id="${userInfo.userId}">全部标为已读</button>
-                <button class="btn-delete" data-user-id="${userInfo.userId}" data-username="${userInfo.username}">删除</button>
             </div>
         </div>
         `;
     }).join('');
     
-    // 为每个用户加载完整对话
-    Object.values(messagesByUser).forEach(userInfo => {
-        loadConversation(userInfo.userId);
+    // 绑定点击事件 - 展开/折叠对话
+    document.querySelectorAll('.message-user-item').forEach(item => {
+        const userHeader = item.querySelector('.user-item-header');
+        const userId = item.dataset.userId;
+        
+        userHeader.addEventListener('click', async () => {
+            const conversationDetail = item.querySelector('.conversation-detail');
+            
+            // 切换展开/折叠
+            if (conversationDetail.style.display === 'none') {
+                // 折叠其他所有对话
+                document.querySelectorAll('.conversation-detail').forEach(detail => {
+                    detail.style.display = 'none';
+                });
+                document.querySelectorAll('.message-user-item').forEach(i => {
+                    i.classList.remove('expanded');
+                });
+                
+                // 展开当前对话
+                conversationDetail.style.display = 'block';
+                item.classList.add('expanded');
+                
+                // 如果还没加载过对话，则加载
+                if (conversationDetail.querySelector('.loading-conversation')) {
+                    await loadConversation(userId);
+                }
+            } else {
+                // 折叠当前对话
+                conversationDetail.style.display = 'none';
+                item.classList.remove('expanded');
+            }
+        });
     });
-    
-    bindMessageGroupEvents();
 }
 
 // 加载与某个用户的完整对话
 async function loadConversation(userId) {
-    const container = document.querySelector(`.conversation-container[data-user-id="${userId}"]`);
+    const container = document.querySelector(`.conversation-detail[data-user-id="${userId}"]`);
     if (!container) return;
     
     try {
@@ -420,6 +446,9 @@ async function loadConversation(userId) {
         const recentMessages = messages.slice(-4);
         const olderMessages = messages.slice(0, -4);
         
+        // 获取用户名
+        const username = messages.length > 0 ? (messages.find(m => m.fromUserId !== currentUserId)?.fromUsername || '用户') : '用户';
+        
         container.innerHTML = `
             <div class="conversation-messages">
                 ${shouldCollapse ? `
@@ -432,6 +461,11 @@ async function loadConversation(userId) {
                 </button>
                 ` : ''}
                 ${recentMessages.map(msg => renderConversationMessage(msg, currentUserId)).join('')}
+            </div>
+            <div class="conversation-actions">
+                <button class="btn-reply" data-user-id="${userId}" data-username="${username}">回复</button>
+                <button class="btn-mark-read" data-user-id="${userId}">全部标为已读</button>
+                <button class="btn-delete" data-user-id="${userId}" data-username="${username}">删除</button>
             </div>
         `;
         
@@ -456,6 +490,9 @@ async function loadConversation(userId) {
                 }
             });
         }
+        
+        // 绑定操作按钮
+        bindConversationActions(container, userId, username);
         
     } catch (error) {
         console.error('加载对话失败:', error);
@@ -486,7 +523,75 @@ function renderConversationMessage(msg, currentUserId) {
     `;
 }
 
-// 绑定留言组事件
+// 绑定对话操作按钮
+function bindConversationActions(container, userId, username) {
+    // 回复按钮
+    const replyBtn = container.querySelector('.btn-reply');
+    if (replyBtn) {
+        replyBtn.addEventListener('click', async () => {
+            // 获取该用户最新的留言ID
+            const messages = container.querySelectorAll('.conversation-message.message-left');
+            const latestMessage = messages[messages.length - 1];
+            const latestMessageId = latestMessage ? latestMessage.dataset.messageId : null;
+            
+            showReplyModal(userId, username, latestMessageId);
+        });
+    }
+    
+    // 全部标为已读按钮
+    const markReadBtn = container.querySelector('.btn-mark-read');
+    if (markReadBtn) {
+        markReadBtn.addEventListener('click', async () => {
+            const unreadMessages = container.querySelectorAll('.conversation-message.unread');
+            
+            try {
+                for (const msgEl of unreadMessages) {
+                    const messageId = msgEl.dataset.messageId;
+                    await API.markMessageRead(messageId);
+                    msgEl.classList.remove('unread');
+                }
+                
+                // 更新用户项的未读状态
+                const userItem = document.querySelector(`.message-user-item[data-user-id="${userId}"]`);
+                if (userItem) {
+                    userItem.classList.remove('has-unread');
+                    const unreadCount = userItem.querySelector('.unread-count');
+                    if (unreadCount) unreadCount.remove();
+                }
+                
+                await loadMessages();
+                Utils.showToast('已标记为已读', 'success');
+            } catch (error) {
+                console.error('标记已读失败:', error);
+                Utils.showToast('操作失败', 'error');
+            }
+        });
+    }
+    
+    // 删除按钮
+    const deleteBtn = container.querySelector('.btn-delete');
+    if (deleteBtn) {
+        deleteBtn.addEventListener('click', async () => {
+            if (!confirm(`确定要删除与 ${username} 的所有对话吗？`)) {
+                return;
+            }
+            
+            try {
+                Utils.showLoading();
+                await API.deleteMessagesFromUser(userId);
+                await loadMessages();
+                Utils.showToast('删除成功', 'success');
+            } catch (error) {
+                console.error('删除留言失败:', error);
+                Utils.showToast('删除失败', 'error');
+            } finally {
+                Utils.hideLoading();
+            }
+        });
+    }
+}
+
+// 绑定留言组事件（已废弃，保留以防兼容性问题）
 function bindMessageGroupEvents() {
     
     // 绑定回复按钮事件
