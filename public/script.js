@@ -351,7 +351,13 @@ function renderMessages() {
         return;
     }
     
-    messagesList.innerHTML = appState.messages.map(msg => `
+    console.log('渲染留言列表:', appState.messages);
+    
+    messagesList.innerHTML = appState.messages.map(msg => {
+        console.log('留言数据:', msg);
+        console.log('原始卡片内容:', msg.originalCardContent);
+        
+        return `
         <div class="message-item ${msg.isRead ? 'read' : 'unread'}" data-message-id="${msg._id}">
             <div class="message-header">
                 <strong>${msg.fromUsername}</strong>
@@ -359,18 +365,20 @@ function renderMessages() {
             </div>
             ${msg.originalCardContent ? `
             <div class="message-original">
-                <div class="original-label">回复你的卡片：</div>
-                <div class="original-content">${msg.originalCardContent}</div>
+                <div class="original-label">对方回复了你的卡片：</div>
+                <div class="original-content">"${msg.originalCardContent}"</div>
             </div>
             ` : ''}
             <div class="message-content">
+                <div class="message-label">留言内容：</div>
                 <p>${msg.content}</p>
             </div>
             <div class="message-actions">
                 <button class="btn-reply" data-user-id="${msg.fromUserId}" data-username="${msg.fromUsername}">回复</button>
             </div>
         </div>
-    `).join('');
+        `;
+    }).join('');
     
     // 绑定回复按钮事件
     document.querySelectorAll('.btn-reply').forEach(btn => {

@@ -321,6 +321,8 @@ app.post('/api/messages', async (req, res) => {
             return res.status(404).json({ error: '用户或卡片不存在' });
         }
         
+        console.log('发送留言 - 卡片内容:', card.content);
+        
         const message = new Message({
             fromUserId: fromUser._id,
             fromUsername: fromUser.username,
@@ -332,6 +334,8 @@ app.post('/api/messages', async (req, res) => {
         });
         
         await message.save();
+        
+        console.log('留言已保存，包含原始内容:', message.originalCardContent);
         
         res.json({ success: true, message });
     } catch (error) {
