@@ -688,6 +688,17 @@ p {
 }
 
 /* 认证表单 */
+.auth-logo {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.auth-logo img {
+    max-width: 200px;
+    height: auto;
+    display: inline-block;
+}
+
 .auth-form {
     display: none;
 }
@@ -774,6 +785,22 @@ p {
     font-size: 12px;
     color: #718096;
     margin-top: 5px;
+}
+
+/* 主页面 Logo */
+.main-logo {
+    text-align: center;
+    padding: 15px 0 10px;
+    background: rgba(255, 255, 255, 0.9);
+    border-bottom: 1px solid rgba(26, 32, 44, 0.08);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+.main-logo img {
+    max-width: 150px;
+    height: auto;
+    display: inline-block;
 }
 
 /* 顶部导航 */
