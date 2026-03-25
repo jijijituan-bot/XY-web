@@ -205,6 +205,11 @@ function bindProfileEvents() {
             return;
         }
         
+        if (bio.length < 10) {
+            Utils.showToast('个人简介至少需要10个字', 'error');
+            return;
+        }
+        
         try {
             Utils.showLoading();
             
@@ -224,13 +229,6 @@ function bindProfileEvents() {
         } finally {
             Utils.hideLoading();
         }
-    });
-    
-    // 跳过设置
-    document.getElementById('skipProfileBtn').addEventListener('click', () => {
-        PageManager.showPage('main');
-        PageManager.showTab('cards');
-        loadUserData();
     });
     
     // 编辑资料
