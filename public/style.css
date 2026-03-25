@@ -803,20 +803,25 @@ p {
     display: inline-block;
 }
 
-/* 顶部导航 */
-.top-nav {
+/* 底部导航 */
+.bottom-nav {
     display: flex;
     justify-content: space-around;
-    background: rgba(255, 255, 255, 0.85);
-    border-bottom: 1px solid rgba(26, 32, 44, 0.08);
-    padding: 10px 0;
-    position: sticky;
-    top: 0;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    padding: 12px 20px 16px;
+    position: fixed;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
     z-index: 100;
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    box-shadow: none;
-    transition: box-shadow 0.3s ease;
+    border-radius: 30px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+    width: calc(100% - 40px);
+    max-width: 500px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
 .nav-item {
@@ -824,31 +829,34 @@ p {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 5px;
+    gap: 4px;
     padding: 8px;
     cursor: pointer;
-    transition: color 0.2s ease, transform 0.2s ease;
+    transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
-    color: #4a5568;
+    color: #718096;
     -webkit-tap-highlight-color: transparent;
     user-select: none;
+    border-radius: 16px;
 }
 
 .nav-item:active {
-    transform: scale(0.95);
+    transform: scale(0.92);
+    background: rgba(102, 126, 234, 0.1);
 }
 
 .nav-item.active {
     color: #667eea;
+    background: rgba(102, 126, 234, 0.08);
 }
 
 .nav-item .icon {
     font-size: 24px;
-    transition: transform 0.2s ease;
+    transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .nav-item.active .icon {
-    transform: scale(1.1);
+    transform: scale(1.15);
 }
 
 .nav-item span:not(.icon):not(.badge) {
@@ -872,7 +880,8 @@ p {
 /* 标签内容 */
 .tab-content {
     display: none;
-    min-height: calc(100vh - 60px);
+    min-height: calc(100vh - 120px);
+    padding-bottom: 100px;
 }
 
 .tab-content.active {
@@ -882,7 +891,7 @@ p {
 /* 卡片容器 */
 .cards-container {
     padding: 20px;
-    min-height: calc(100vh - 80px);
+    min-height: calc(100vh - 200px);
     display: flex;
     justify-content: center;
     align-items: center;

@@ -247,9 +247,11 @@ function bindProfileEvents() {
 
 // 主页面事件
 function bindMainPageEvents() {
-    // 标签切换
+    // 标签切换 - 使用 touchstart 提升响应速度
     document.querySelectorAll('.nav-item').forEach(item => {
-        item.addEventListener('click', () => {
+        // 防止重复绑定
+        const handleTabSwitch = (e) => {
+            e.preventDefault();
             const tab = item.dataset.tab;
             PageManager.showTab(tab);
             
@@ -258,7 +260,14 @@ function bindMainPageEvents() {
             } else if (tab === 'cards') {
                 loadCards();
             }
-        });
+        };
+        
+        // 移动端使用 touchstart，桌面端使用 click
+        if ('ontouchstart' in window) {
+            item.addEventListener('touchstart', handleTabSwitch, { passive: false });
+        } else {
+            item.addEventListener('click', handleTabSwitch);
+        }
     });
     
     // 刷新卡片（使用事件委托，因为按钮是动态创建的）
