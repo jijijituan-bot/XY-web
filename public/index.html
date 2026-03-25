@@ -277,21 +277,24 @@
 
     <!-- 留言模态框 -->
     <div id="messageModal" class="modal">
-        <div class="modal-content">
+        <div class="modal-content message-modal">
             <div class="modal-header">
                 <h2>发送留言</h2>
                 <button class="modal-close">&times;</button>
             </div>
             <div class="modal-body">
-                <p>给 <strong id="messageToUser"></strong> 留言：</p>
+                <div class="message-to-user">
+                    <span class="to-label">发送给</span>
+                    <span id="messageToUser" class="to-username"></span>
+                </div>
                 <div class="form-group">
-                    <textarea id="messageContent" placeholder="写下你想说的话..." maxlength="500" rows="6"></textarea>
+                    <textarea id="messageContent" placeholder="写下你想说的话..." maxlength="500" rows="8"></textarea>
                     <div class="char-count"><span id="messageCharCount">0</span>/500</div>
                 </div>
             </div>
             <div class="modal-footer">
-                <button id="sendMessageModalBtn" class="btn-primary">发送</button>
                 <button class="modal-cancel btn-secondary">取消</button>
+                <button id="sendMessageModalBtn" class="btn-primary">发送</button>
             </div>
         </div>
     </div>
