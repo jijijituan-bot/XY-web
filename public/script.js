@@ -880,14 +880,16 @@ async function showReplyModal(userId, username, replyToMessageId = null) {
 // 聊天相关事件（保留原有功能）
 function bindChatEvents() {
     document.getElementById('startChatMatchBtn').addEventListener('click', () => {
-        const nickname = document.getElementById('chatNickname').value.trim();
-        const genderInput = document.querySelector('input[name="chatGender"]:checked');
-        const gender = genderInput ? genderInput.value : 'other';
+        const user = appState.getUser();
         
-        if (!nickname) {
-            Utils.showToast('请输入昵称', 'error');
+        if (!user) {
+            Utils.showToast('请先登录', 'error');
             return;
         }
+        
+        // 使用用户注册时的用户名和性别
+        const nickname = user.username;
+        const gender = user.gender || 'other';
         
         startChatMatching(nickname, gender);
     });

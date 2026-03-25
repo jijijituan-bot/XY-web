@@ -62,7 +62,7 @@
             <p>让其他人更了解你</p>
             
             <div class="form-group">
-                <label>选择性别：</label>
+                <label>选择性别：<span class="gender-notice">（选择后不可更改）</span></label>
                 <div class="gender-options">
                     <label class="gender-label">
                         <input type="radio" name="profileGender" value="male">
@@ -123,33 +123,15 @@
         <!-- 聊天标签页 -->
         <div id="chatTab" class="tab-content">
             <div class="chat-match-container">
-                <h2>随机匹配聊天</h2>
-                <p>与陌生人进行实时心洞对话</p>
-                
-                <div class="form-group">
-                    <label>选择性别：</label>
-                    <div class="gender-options">
-                        <label class="gender-label">
-                            <input type="radio" name="chatGender" value="male">
-                            <span>男</span>
-                        </label>
-                        <label class="gender-label">
-                            <input type="radio" name="chatGender" value="female">
-                            <span>女</span>
-                        </label>
-                        <label class="gender-label">
-                            <input type="radio" name="chatGender" value="other" checked>
-                            <span>其他</span>
-                        </label>
-                    </div>
+                <div class="chat-welcome">
+                    <h2>随机匹配聊天</h2>
+                    <p>与陌生人进行实时心洞对话</p>
                 </div>
                 
-                <div class="form-group">
-                    <label for="chatNickname">昵称：</label>
-                    <input type="text" id="chatNickname" placeholder="输入聊天昵称" maxlength="20">
-                </div>
-                
-                <button id="startChatMatchBtn" class="btn-primary">开始匹配</button>
+                <button id="startChatMatchBtn" class="btn-start-match">
+                    <span class="match-icon">💭</span>
+                    <span class="match-text">开始匹配</span>
+                </button>
             </div>
         </div>
 

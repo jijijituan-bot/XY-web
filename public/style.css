@@ -1375,20 +1375,93 @@ p {
 /* 聊天匹配容器 */
 .chat-match-container {
     padding: 40px 20px;
-    max-width: 400px;
+    max-width: 500px;
     margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: calc(100vh - 250px);
 }
 
-.chat-match-container h2 {
+.chat-welcome {
     text-align: center;
+    margin-bottom: 60px;
+}
+
+.chat-welcome h2 {
     color: #1a202c;
-    margin-bottom: 10px;
+    margin-bottom: 12px;
+    font-size: 28px;
+    font-weight: 600;
 }
 
-.chat-match-container > p {
-    text-align: center;
-    color: #4a5568;
-    margin-bottom: 30px;
+.chat-welcome p {
+    color: #718096;
+    font-size: 15px;
+}
+
+/* 开始匹配按钮 */
+.btn-start-match {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    border: none;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.9) 0%, rgba(118, 75, 162, 0.9) 100%);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    box-shadow: 0 20px 60px rgba(102, 126, 234, 0.4);
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    -webkit-tap-highlight-color: transparent;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-start-match::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at center, rgba(255, 255, 255, 0.2) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.btn-start-match:hover::before {
+    opacity: 1;
+}
+
+.btn-start-match:active {
+    transform: scale(0.95);
+    box-shadow: 0 15px 45px rgba(102, 126, 234, 0.5);
+}
+
+.match-icon {
+    font-size: 56px;
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
+}
+
+.match-text {
+    color: white;
+    font-size: 20px;
+    font-weight: 600;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* 性别提示 */
+.gender-notice {
+    font-size: 13px;
+    color: #e53e3e;
+    font-weight: 500;
+    margin-left: 8px;
 }
 
 /* 个人中心 */
@@ -1405,19 +1478,26 @@ p {
     border-radius: 20px;
     margin-bottom: 20px;
     backdrop-filter: blur(10px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
 }
 
 .profile-header h2 {
     color: #1a202c;
-    margin-bottom: 10px;
+    margin: 0;
 }
 
 .profile-gender {
-    display: inline-block;
-    padding: 5px 15px;
-    border-radius: 15px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 20px;
+    border-radius: 20px;
     font-size: 14px;
     font-weight: 600;
+    background: white;
 }
 
 .profile-gender.male {
@@ -1779,6 +1859,24 @@ p {
     .profile-container {
         padding: 15px;
     }
+    
+    /* 移动端开始匹配按钮优化 */
+    .btn-start-match {
+        width: 180px;
+        height: 180px;
+    }
+    
+    .match-icon {
+        font-size: 48px;
+    }
+    
+    .match-text {
+        font-size: 18px;
+    }
+    
+    .chat-welcome h2 {
+        font-size: 24px;
+    }
 }
 
 @media (min-width: 481px) {
@@ -1795,6 +1893,12 @@ p {
     
     .message-modal {
         border-radius: 24px;
+    }
+    
+    /* 桌面端开始匹配按钮 */
+    .btn-start-match:hover {
+        transform: scale(1.05);
+        box-shadow: 0 25px 70px rgba(102, 126, 234, 0.5);
     }
 }
 
