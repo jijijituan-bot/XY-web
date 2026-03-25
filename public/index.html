@@ -239,7 +239,7 @@
 
     <!-- 卡片编辑模态框 -->
     <div id="cardModal" class="modal">
-        <div class="modal-content">
+        <div class="modal-content card-modal">
             <div class="modal-header">
                 <h2>编辑我的卡片</h2>
                 <button class="modal-close">&times;</button>
@@ -247,13 +247,13 @@
             <div class="modal-body">
                 <div class="form-group">
                     <label for="cardContent">卡片内容（最多500字）：</label>
-                    <textarea id="cardContent" placeholder="介绍一下自己，让别人了解你..." maxlength="500" rows="8"></textarea>
+                    <textarea id="cardContent" placeholder="介绍一下自己，让别人了解你..." maxlength="500" rows="10"></textarea>
                     <div class="char-count"><span id="cardCharCount">0</span>/500</div>
                 </div>
             </div>
             <div class="modal-footer">
-                <button id="saveCardBtn" class="btn-primary">保存</button>
                 <button class="modal-cancel btn-secondary">取消</button>
+                <button id="saveCardBtn" class="btn-primary">保存</button>
             </div>
         </div>
     </div>
