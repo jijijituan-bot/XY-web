@@ -65,7 +65,11 @@ async function loadMyCard() {
         
         if (data.card) {
             const user = appState.getUser();
-            const genderIcon = user.gender === 'male' ? '♂' : user.gender === 'female' ? '♀' : '⚧';
+            const genderIcon = user.gender === 'male' 
+                ? '<img src="https://i.ibb.co/HLxrJFwW/849f6493e9e1.png" alt="男" class="gender-icon">' 
+                : user.gender === 'female' 
+                ? '<img src="https://i.ibb.co/twmD2v0Y/d55f0eccebf3.png" alt="女" class="gender-icon">' 
+                : '⚧';
             
             myCardPreview.innerHTML = `
                 <div class="my-card-content">
@@ -354,7 +358,11 @@ function createCardElement(card, index) {
     div.className = 'user-card';
     div.style.zIndex = appState.cards.length - index;
     
-    const genderIcon = card.gender === 'male' ? '♂' : card.gender === 'female' ? '♀' : '⚧';
+    const genderIcon = card.gender === 'male' 
+        ? '<img src="https://i.ibb.co/HLxrJFwW/849f6493e9e1.png" alt="男" class="gender-icon">' 
+        : card.gender === 'female' 
+        ? '<img src="https://i.ibb.co/twmD2v0Y/d55f0eccebf3.png" alt="女" class="gender-icon">' 
+        : '⚧';
     
     div.innerHTML = `
         <div class="card-header">
@@ -967,9 +975,12 @@ function setupSocketEvents() {
         PageManager.showPage('chatroom');
         document.getElementById('partnerName').textContent = data.partner.nickname;
         
-        const genderIcon = data.partner.gender === 'male' ? '♂ 男' : 
-                          data.partner.gender === 'female' ? '♀ 女' : '⚧ 其他';
-        document.getElementById('partnerGender').textContent = genderIcon;
+        const genderIcon = data.partner.gender === 'male' 
+            ? '<img src="https://i.ibb.co/HLxrJFwW/849f6493e9e1.png" alt="男" class="gender-icon-inline"> 男' 
+            : data.partner.gender === 'female' 
+            ? '<img src="https://i.ibb.co/twmD2v0Y/d55f0eccebf3.png" alt="女" class="gender-icon-inline"> 女' 
+            : '⚧ 其他';
+        document.getElementById('partnerGender').innerHTML = genderIcon;
         
         addSystemMessage(`已连接到 ${data.partner.nickname}，开始聊天吧！`);
     });

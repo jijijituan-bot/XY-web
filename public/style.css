@@ -923,10 +923,27 @@ p {
 }
 
 .card-gender {
-    font-size: 18px;
     padding: 5px 12px;
-    background: rgba(102, 126, 234, 0.2);
+    background: white;
     border-radius: 15px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.gender-icon {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+    display: block;
+}
+
+.gender-icon-inline {
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+    vertical-align: middle;
+    margin-right: 4px;
 }
 
 .card-content {
@@ -1460,8 +1477,12 @@ p {
 }
 
 .my-card-gender {
-    font-size: 18px;
-    color: #667eea;
+    background: white;
+    padding: 4px 10px;
+    border-radius: 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .my-card-text {
