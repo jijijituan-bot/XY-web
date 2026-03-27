@@ -205,12 +205,49 @@ app.put('/api/user/profile', async (req, res) => {
                 _id: user._id,
                 username: user.username,
                 bio: user.bio,
-                gender: user.gender
+                gender: user.gender,
+                location: user.location
             }
         });
     } catch (error) {
         console.error('更新资料错误:', error);
         res.status(500).json({ error: '更新资料失败' });
+    }
+});
+
+// 更新用户位置
+app.put('/api/user/location', async (req, res) => {
+    try {
+        if (!req.session.userId) {
+            return res.status(401).json({ error: '未登录' });
+        }
+        
+        const { city, longitude, latitude } = req.body;
+        
+        const user = await User.findById(req.session.userId);
+        if (!user) {
+            return res.status(404).json({ error: '用户不存在' });
+        }
+        
+        if (!user.location) {
+            user.location = {};
+        }
+        
+        if (city) user.location.city = city;
+        if (longitude !== undefined && latitude !== undefined) {
+            user.location.coordinates = [longitude, latitude];
+        }
+        user.location.updatedAt = new Date();
+        
+        await user.save();
+        
+        res.json({
+            success: true,
+            location: user.location
+        });
+    } catch (error) {
+        console.error('更新位置错误:', error);
+        res.status(500).json({ error: '更新位置失败' });
     }
 });
 
@@ -221,7 +258,7 @@ app.post('/api/cards', async (req, res) => {
             return res.status(401).json({ error: '未登录' });
         }
         
-        const { content } = req.body;
+        const { content, city } = req.body;
         
         if (!content || content.trim().length === 0) {
             return res.status(400).json({ error: '内容不能为空' });
@@ -244,7 +281,8 @@ app.post('/api/cards', async (req, res) => {
             userId: user._id,
             username: user.username,
             content: content.trim(),
-            gender: user.gender
+            gender: user.gender,
+            city: city || user.location?.city || ''
         });
         
         await card.save();

@@ -1021,10 +1021,25 @@ p {
     border-bottom: 1px solid rgba(26, 32, 44, 0.1);
 }
 
+.card-user-info {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
 .card-username {
     font-size: 20px;
     font-weight: 700;
     color: #1a202c;
+}
+
+.card-location {
+    font-size: 13px;
+    color: #718096;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
 }
 
 .card-gender {

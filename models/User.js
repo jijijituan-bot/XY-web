@@ -25,6 +25,20 @@ const userSchema = new mongoose.Schema({
         enum: ['male', 'female', 'other'],
         default: 'other'
     },
+    location: {
+        city: {
+            type: String,
+            default: ''
+        },
+        coordinates: {
+            type: [Number], // [longitude, latitude]
+            index: '2dsphere'
+        },
+        updatedAt: {
+            type: Date,
+            default: Date.now
+        }
+    },
     createdAt: {
         type: Date,
         default: Date.now

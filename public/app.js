@@ -88,10 +88,17 @@ class API {
         });
     }
 
-    static async createCard(content) {
+    static async updateLocation(city, longitude, latitude) {
+        return this.request('/api/user/location', {
+            method: 'PUT',
+            body: JSON.stringify({ city, longitude, latitude })
+        });
+    }
+
+    static async createCard(content, city) {
         return this.request('/api/cards', {
             method: 'POST',
-            body: JSON.stringify({ content })
+            body: JSON.stringify({ content, city })
         });
     }
 

@@ -19,6 +19,10 @@ const cardSchema = new mongoose.Schema({
         type: String,
         enum: ['male', 'female', 'other']
     },
+    city: {
+        type: String,
+        default: ''
+    },
     createdAt: {
         type: Date,
         default: Date.now

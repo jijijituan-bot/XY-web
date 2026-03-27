@@ -20,6 +20,9 @@ async function initApp() {
         const data = await API.getUser();
         appState.setUser(data.user);
         
+        // 获取用户位置
+        getUserLocation();
+        
         // 已登录，显示主页
         PageManager.showPage('main');
         PageManager.showTab('cards');
@@ -29,6 +32,50 @@ async function initApp() {
         PageManager.showPage('auth');
     } finally {
         Utils.hideLoading();
+    }
+}
+
+// 获取用户位置
+function getUserLocation() {
+    if ('geolocation' in navigator) {
+        navigator.geolocation.getCurrentPosition(
+            async (position) => {
+                const { latitude, longitude } = position.coords;
+                
+                // 使用高德地图API进行逆地理编码（免费）
+                try {
+                    const response = await fetch(
+                        `https://restapi.amap.com/v3/geocode/regeo?location=${longitude},${latitude}&key=YOUR_AMAP_KEY&extensions=base`
+                    );
+                    const data = await response.json();
+                    
+                    if (data.status === '1' && data.regeocode) {
+                        const city = data.regeocode.addressComponent.city || 
+                                   data.regeocode.addressComponent.province;
+                        
+                        // 更新用户位置
+                        await API.updateLocation(city, longitude, latitude);
+                        
+                        // 更新本地用户信息
+                        const user = appState.getUser();
+                        if (user) {
+                            user.location = { city, coordinates: [longitude, latitude] };
+                            appState.setUser(user);
+                        }
+                    }
+                } catch (error) {
+                    console.log('获取城市信息失败，使用默认位置');
+                }
+            },
+            (error) => {
+                console.log('获取位置失败:', error.message);
+            },
+            {
+                enableHighAccuracy: false,
+                timeout: 5000,
+                maximumAge: 300000 // 5分钟缓存
+            }
+        );
     }
 }
 
@@ -218,7 +265,9 @@ function bindProfileEvents() {
             appState.setUser(profileData.user);
             
             // 自动创建卡片（使用个人简介作为卡片内容）
-            await API.createCard(bio);
+            const user = appState.getUser();
+            const city = user?.location?.city || '';
+            await API.createCard(bio, city);
             
             Utils.showToast('资料保存成功！卡片已创建', 'success');
             PageManager.showPage('main');
@@ -371,9 +420,14 @@ function createCardElement(card, index) {
         ? '<img src="https://i.ibb.co/twmD2v0Y/d55f0eccebf3.png" alt="女" class="gender-icon">' 
         : '⚧';
     
+    const locationHTML = card.city ? `<span class="card-location">📍 ${card.city}</span>` : '';
+    
     div.innerHTML = `
         <div class="card-header">
-            <span class="card-username">${card.username}</span>
+            <div class="card-user-info">
+                <span class="card-username">${card.username}</span>
+                ${locationHTML}
+            </div>
             <span class="card-gender">${genderIcon}</span>
         </div>
         <div class="card-content">
@@ -1146,7 +1200,9 @@ function bindModalEvents() {
             
             try {
                 Utils.showLoading();
-                await API.createCard(content);
+                const user = appState.getUser();
+                const city = user?.location?.city || '';
+                await API.createCard(content, city);
                 Utils.showToast('卡片保存成功！', 'success');
                 PageManager.hideAllModals();
                 // 刷新我的卡片显示
