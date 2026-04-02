@@ -36,7 +36,7 @@ async function initApp() {
 }
 
 // 获取用户位置
-function getUserLocation() {
+async function getUserLocation() {
     console.log('开始获取用户位置...');
     
     if ('geolocation' in navigator) {
@@ -73,6 +73,21 @@ function getUserLocation() {
                             console.log('本地用户信息已更新');
                         }
                         
+                        // 检查用户是否已有卡片，如果有则更新卡片的城市信息
+                        try {
+                            const cardData = await API.getMyCard();
+                            if (cardData.card) {
+                                console.log('用户已有卡片，更新城市信息');
+                                // 重新创建卡片以更新城市信息
+                                await API.createCard(cardData.card.content, city);
+                                console.log('卡片城市信息已更新');
+                                // 刷新我的卡片显示
+                                await loadMyCard();
+                            }
+                        } catch (error) {
+                            console.log('更新卡片城市信息失败:', error);
+                        }
+                        
                         Utils.showToast(`位置已更新：${city}`, 'success');
                     } else {
                         console.error('高德API返回错误:', data);
@@ -83,6 +98,9 @@ function getUserLocation() {
             },
             (error) => {
                 console.error('获取位置失败:', error.message, error);
+                if (error.code === 1) {
+                    console.log('用户拒绝了位置权限');
+                }
             },
             {
                 enableHighAccuracy: true,
@@ -182,6 +200,10 @@ function bindAuthEvents() {
             appState.setUser(data.user);
             
             Utils.showToast('登录成功！', 'success');
+            
+            // 立即请求位置权限
+            getUserLocation();
+            
             PageManager.showPage('main');
             PageManager.showTab('cards');
             await loadUserData();
@@ -224,6 +246,10 @@ function bindAuthEvents() {
             appState.setUser(data.user);
             
             Utils.showToast('注册成功！', 'success');
+            
+            // 立即请求位置权限
+            getUserLocation();
+            
             PageManager.showPage('profileSetup');
         } catch (error) {
             Utils.showToast(error.message, 'error');
