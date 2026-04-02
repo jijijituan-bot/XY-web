@@ -74,19 +74,23 @@ async function getUserLocation() {
                         }
                         
                         // 检查用户是否已有卡片，如果有则更新卡片的城市信息
-                        try {
-                            const cardData = await API.getMyCard();
-                            if (cardData.card) {
-                                console.log('用户已有卡片，更新城市信息');
-                                // 重新创建卡片以更新城市信息
-                                await API.createCard(cardData.card.content, city);
-                                console.log('卡片城市信息已更新');
-                                // 刷新我的卡片显示
-                                await loadMyCard();
+                        setTimeout(async () => {
+                            try {
+                                const cardData = await API.getMyCard();
+                                if (cardData.card) {
+                                    console.log('用户已有卡片，更新城市信息');
+                                    // 重新创建卡片以更新城市信息
+                                    await API.createCard(cardData.card.content, city);
+                                    console.log('卡片城市信息已更新');
+                                    // 刷新我的卡片显示
+                                    if (document.getElementById('myCardPreview')) {
+                                        await loadMyCard();
+                                    }
+                                }
+                            } catch (error) {
+                                console.log('更新卡片城市信息失败:', error);
                             }
-                        } catch (error) {
-                            console.log('更新卡片城市信息失败:', error);
-                        }
+                        }, 500);
                         
                         Utils.showToast(`位置已更新：${city}`, 'success');
                     } else {
@@ -149,12 +153,16 @@ async function loadMyCard() {
                 ? '<img src="https://i.ibb.co/twmD2v0Y/d55f0eccebf3.png" alt="女" class="gender-icon">' 
                 : '⚧';
             
+            // 显示城市信息
+            const cityDisplay = data.card.city ? `<span class="card-city">📍 ${data.card.city}</span>` : '';
+            
             myCardPreview.innerHTML = `
                 <div class="my-card-content">
                     <div class="my-card-header">
                         <span class="my-card-username">${user.username}</span>
                         <span class="my-card-gender">${genderIcon}</span>
                     </div>
+                    ${cityDisplay}
                     <div class="my-card-text">${data.card.content}</div>
                     <div class="my-card-footer">
                         <span class="my-card-time">创建于 ${Utils.formatDate(data.card.createdAt)}</span>
