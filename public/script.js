@@ -112,9 +112,6 @@ async function loadUserData() {
         
         // 加载留言
         await loadMessages();
-        
-        // 设置聊天昵称
-        document.getElementById('chatNickname').value = user.username;
     } catch (error) {
         console.error('加载用户数据失败:', error);
     }
