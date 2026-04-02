@@ -37,45 +37,61 @@ async function initApp() {
 
 // 获取用户位置
 function getUserLocation() {
+    console.log('开始获取用户位置...');
+    
     if ('geolocation' in navigator) {
+        console.log('浏览器支持地理位置');
+        
         navigator.geolocation.getCurrentPosition(
             async (position) => {
                 const { latitude, longitude } = position.coords;
+                console.log('获取到坐标:', { latitude, longitude });
                 
-                // 使用高德地图API进行逆地理编码（免费）
+                // 使用高德地图API进行逆地理编码
                 try {
-                    const response = await fetch(
-                        `https://restapi.amap.com/v3/geocode/regeo?location=${longitude},${latitude}&key=b88475e4f9afd29bf99463b05e1315fd&extensions=base`
-                    );
+                    const url = `https://restapi.amap.com/v3/geocode/regeo?location=${longitude},${latitude}&key=b88475e4f9afd29bf99463b05e1315fd&extensions=base`;
+                    console.log('请求高德API:', url);
+                    
+                    const response = await fetch(url);
                     const data = await response.json();
+                    console.log('高德API返回:', data);
                     
                     if (data.status === '1' && data.regeocode) {
                         const city = data.regeocode.addressComponent.city || 
                                    data.regeocode.addressComponent.province;
+                        console.log('解析到城市:', city);
                         
                         // 更新用户位置
-                        await API.updateLocation(city, longitude, latitude);
+                        const result = await API.updateLocation(city, longitude, latitude);
+                        console.log('位置更新结果:', result);
                         
                         // 更新本地用户信息
                         const user = appState.getUser();
                         if (user) {
                             user.location = { city, coordinates: [longitude, latitude] };
                             appState.setUser(user);
+                            console.log('本地用户信息已更新');
                         }
+                        
+                        Utils.showToast(`位置已更新：${city}`, 'success');
+                    } else {
+                        console.error('高德API返回错误:', data);
                     }
                 } catch (error) {
-                    console.log('获取城市信息失败，使用默认位置');
+                    console.error('获取城市信息失败:', error);
                 }
             },
             (error) => {
-                console.log('获取位置失败:', error.message);
+                console.error('获取位置失败:', error.message, error);
             },
             {
-                enableHighAccuracy: false,
-                timeout: 5000,
-                maximumAge: 300000 // 5分钟缓存
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 0
             }
         );
+    } else {
+        console.log('浏览器不支持地理位置');
     }
 }
 

@@ -223,6 +223,10 @@ app.put('/api/user/location', async (req, res) => {
         }
         
         const { city, longitude, latitude } = req.body;
+        console.log('=== 更新用户位置 ===');
+        console.log('用户ID:', req.session.userId);
+        console.log('城市:', city);
+        console.log('坐标:', { longitude, latitude });
         
         const user = await User.findById(req.session.userId);
         if (!user) {
@@ -240,6 +244,7 @@ app.put('/api/user/location', async (req, res) => {
         user.location.updatedAt = new Date();
         
         await user.save();
+        console.log('位置更新成功:', user.location);
         
         res.json({
             success: true,
