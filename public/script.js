@@ -45,7 +45,7 @@ function getUserLocation() {
                 // 使用高德地图API进行逆地理编码（免费）
                 try {
                     const response = await fetch(
-                        `https://restapi.amap.com/v3/geocode/regeo?location=${longitude},${latitude}&key=YOUR_AMAP_KEY&extensions=base`
+                        `https://restapi.amap.com/v3/geocode/regeo?location=${longitude},${latitude}&key=b88475e4f9afd29bf99463b05e1315fd&extensions=base`
                     );
                     const data = await response.json();
                     
